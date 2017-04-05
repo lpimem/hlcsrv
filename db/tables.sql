@@ -1,3 +1,6 @@
+
+/* HLC function tables */
+
 create table if not exists `hlc_user`(
   `id` integer primary key,
   `name` varchar(256) not null,

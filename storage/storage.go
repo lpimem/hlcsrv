@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"github.com/lpimem/hlc/util"
 	"github.com/lpimem/hlcsrv/hlcmsg"
+	"github.com/lpimem/hlcsrv/util"
 )
 
 var storage *SqliteStorage = nil
