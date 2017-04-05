@@ -9,6 +9,9 @@ create table if not exists `hlc_user`(
   `mtime` timestamp default current_timestamp
 );
 
+create unique index if not exists `idx_user_name` on `hlc_user` (`name`);
+create unique index if not exists `idx_user_email` on `hlc_user` (`email`);
+
 create table if not exists `hlc_page`(
   `id` integer primary key,
   `title` varchar(512) not null,
@@ -19,6 +22,8 @@ create table if not exists `hlc_page`(
   `ctime` timestamp default current_timestamp,
   `mtime` timestamp default current_timestamp
 );
+
+create unique index if not exists `idx_page_url` on `hlc_page` (`url`);
 
 create table if not exists `hlc_range`(
   `id` integer primary key,

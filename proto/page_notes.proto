@@ -3,7 +3,7 @@ package hlcmsg;
 import "range_meta.proto";
 
 message PageNotes{
-  string uri = 1;
-  string user = 2;
+  uint32 pageid = 1;
+  uint32 uid = 2;
   repeated RangeMeta highlights = 3;
 }

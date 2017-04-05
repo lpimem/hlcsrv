@@ -31,9 +31,57 @@ func (s *SqliteStorage) Close() {
 	s.DB.Close()
 }
 
-func (s *SqliteStorage) QueryMetas(uid uint8, pid uint32) ([]*hlcmsg.RangeMeta, error) {
+type PageNoteDict map[uint32][]*hlcmsg.PageNotes
+
+func (d PageNoteDict) GetOrCreateNoteList(uid uint32) (notes []*hlcmsg.PageNotes) {
+	if _, ok := d[uid]; !ok {
+		notes = []*hlcmsg.PageNotes{}
+		d[uid] = notes
+	} else {
+		notes = d[uid]
+	}
+	return
+}
+
+func (d *PageNoteDict) AddNote(uid uint32, note *hlcmsg.PageNotes) {
+	notes := d.GetOrCreateNoteList(uid)
+	notes = append(notes, note)
+	(*d)[uid] = notes
+}
+
+func (d *PageNoteDict) GetPageNote(uid uint32, pid uint32) *hlcmsg.PageNotes {
+	notes := d.GetOrCreateNoteList(uid)
+	for _, n := range notes {
+		if n.Pageid == pid {
+			return n
+		}
+	}
+	return nil
+}
+
+func (d *PageNoteDict) NewPageNote(uid uint32, pid uint32) *hlcmsg.PageNotes {
+	notes := &hlcmsg.PageNotes{
+		Pageid:     pid,
+		Uid:        uid,
+		Highlights: []*hlcmsg.RangeMeta{},
+	}
+	d.AddNote(uid, notes)
+	return notes
+}
+
+func (s *SqliteStorage) QueryMetas(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
+	dict, err := s.QueryPageNotes(uid, pid)
+	if err != nil {
+		util.Log("Error:", err)
+		return []*hlcmsg.RangeMeta{}
+	} else {
+		return dict.GetPageNote(uid, pid).GetHighlights()
+	}
+}
+
+func (s *SqliteStorage) QueryPageNotes(uid uint32, pid uint32) (PageNoteDict, error) {
 	if uid == 0 && pid == 0 {
-		return []*hlcmsg.RangeMeta{}, errors.New("uid and url cannot both be 0")
+		return PageNoteDict{}, errors.New("uid and url cannot both be 0")
 	}
 	var queryBuilder bytes.Buffer
 	queryBuilder.WriteString(`select id, anchor, start, startOffset, end, endOffset, page, author from hlc_range where 1=1 `)
@@ -47,7 +95,7 @@ func (s *SqliteStorage) QueryMetas(uid uint8, pid uint32) ([]*hlcmsg.RangeMeta, 
 		parameters = append(parameters, pid)
 	}
 	var query = queryBuilder.String()
-	result := []*hlcmsg.RangeMeta{}
+	result := PageNoteDict{}
 	err := QueryDb(s.DB, query, parameters, func(rowno int, rows *sql.Rows) error {
 		var id, startOffset, endOffset, page, author uint32
 		var anchor, start, end string
@@ -55,9 +103,20 @@ func (s *SqliteStorage) QueryMetas(uid uint8, pid uint32) ([]*hlcmsg.RangeMeta, 
 		if err != nil {
 			return err
 		}
-		result = append(result, &hlcmsg.RangeMeta{
-			id, anchor, start, startOffset, end, endOffset, "",
-		})
+		note := result.GetPageNote(author, page)
+		if note == nil {
+			note = result.NewPageNote(author, page)
+		}
+		meta := &hlcmsg.RangeMeta{
+			Id:          id,
+			Anchor:      anchor,
+			Start:       start,
+			StartOffset: startOffset,
+			End:         end,
+			EndOffset:   endOffset,
+			Text:        "",
+		}
+		note.Highlights = append(note.Highlights, meta)
 		return nil
 	})
 	return result, err
@@ -70,6 +129,14 @@ func (s *SqliteStorage) NewRangeMeta(uid uint32, pid uint32, m *hlcmsg.RangeMeta
 	}
 	lastId, err := r.LastInsertId()
 	return uint32(lastId), err
+}
+
+func (s *SqliteStorage) DeleteRangeMeta(id uint32) error {
+	if id < 1 {
+		return errors.New("invalid range meta id, should be > 0")
+	}
+	_, err := s.DB.Exec(`delete from hlc_range where id=?`, id)
+	return err
 }
 
 func (s *SqliteStorage) QueryPageId(url string) uint32 {

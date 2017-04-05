@@ -8,14 +8,53 @@ import (
 	"github.com/lpimem/hlcsrv/util"
 )
 
-func TestNewRangeMeta(t *testing.T) {
+func TestQueryNotesByUID(t *testing.T) {
 	resetDb()
-	metas, err := storage.QueryMetas(1, 1)
+	testQueryNotes(1, 0, "uid", t)
+}
+
+func TestQueryNotesByPid(t *testing.T) {
+	resetDb()
+	testQueryNotes(0, 1, "pid", t)
+}
+
+func TestQueryNotesByUidAndPid(t *testing.T) {
+	resetDb()
+	testQueryNotes(1, 1, "uid and pid", t)
+}
+
+func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.PageNotes) {
+	var err error
+	noteDict, err := storage.QueryPageNotes(uid, pid)
 	if err != nil {
-		t.Error("cannot query meta", err)
+		t.Error("cannot query pagenotes", msg, err)
 		t.Fail()
 		return
 	}
+	if uid > 0 {
+		notes = noteDict.GetOrCreateNoteList(uid)
+	} else {
+		for _, uidNotes := range noteDict {
+			notes = uidNotes
+			break
+		}
+	}
+	if len(notes) < 1 {
+		t.Error("queried pagenote dict is empty", msg, notes)
+		t.Fail()
+		return
+	}
+	if len(notes[0].Highlights) < 1 {
+		t.Error("queried note Highlights shouldn't be empty", msg, notes[0])
+		t.Fail()
+	}
+	return
+}
+
+func TestNewRangeMeta(t *testing.T) {
+	resetDb()
+	var err error
+	metas := storage.QueryMetas(1, 1)
 	if len(metas) < 1 {
 		t.Error("should be able to query 1 meta")
 		t.Fail()
@@ -36,9 +75,32 @@ func TestNewRangeMeta(t *testing.T) {
 		t.Fail()
 		return
 	}
-	metas, err = storage.QueryMetas(1, 1)
+	metas = storage.QueryMetas(1, 1)
 	if len(metas) < 2 {
-		t.Error("should be able to query 2 metas, actually got ", metas, err)
+		t.Error("should be able to query 2 metas, actually got ", metas)
+		t.Fail()
+		return
+	}
+}
+
+func TestDeleteRangeMeta(t *testing.T) {
+	resetDb()
+	metas := storage.QueryMetas(1, 1)
+	count := len(metas)
+	if count < 1 {
+		t.Error("should be able to query 1 meta")
+		t.Fail()
+		return
+	}
+	err := storage.DeleteRangeMeta(metas[0].Id)
+	if err != nil {
+		t.Error("cannot delete range meta ", metas[0].Id, err)
+		t.Fail()
+		return
+	}
+	metas = storage.QueryMetas(1, 1)
+	if len(metas) >= count {
+		t.Error("rangemeta is not deleted ", metas[0].Id)
 		t.Fail()
 		return
 	}
