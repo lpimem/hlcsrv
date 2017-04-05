@@ -6,15 +6,15 @@ import (
 	"github.com/lpimem/hlcsrv/util"
 )
 
-func startServ() {
-	util.Log("start ...")
-	service.Serve("127.0.0.1", 23333)
-	util.Log("end ...")
+func main() {
+	_init()
+	startServ()
 }
 
-func main() {
-	util.Log("init db ...")
-	storage.InitStorage("db/test.db")
+func startServ() {
+	service.Serve("127.0.0.1", 23333)
+}
 
-	util.Log("exit 0")
+func _init() {
+	storage.InitStorage(util.GetAbsRunDirPath() + "/db/dev.db")
 }

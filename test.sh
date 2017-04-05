@@ -18,7 +18,7 @@ TEST_RESULT=$TESTDIR/test_result
 for d in */ ; do
   tc=${d%/}
   pushd $tc > /dev/null
-  go test --ldflags -s -o $TESTDIR/$tc.test ../$tc > $TEST_RESULT 2>&1
+  go test -v --ldflags -s -o $TESTDIR/$tc.test ../$tc > $TEST_RESULT 2>&1
   ret=$?
   popd > /dev/null
   msg=`cat $TEST_RESULT`
@@ -28,8 +28,10 @@ for d in */ ; do
     else
       if [[ $msg == "?"* ]]; then 
         color=$YELLOW
-      else
+      elif [[ $msg == *"ok"* ]]; then
         color=$GREEN
+      else 
+        color=$RED
       fi 
     fi 
     echo -e "${color} $msg ${RESET}"
