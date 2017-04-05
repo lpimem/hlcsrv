@@ -1,0 +1,4 @@
+build
+testBuild
+db/*.db
+.vscode

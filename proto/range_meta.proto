@@ -1,0 +1,11 @@
+syntax = "proto3";
+package hlcmsg;
+message RangeMeta{
+  uint32 id=1;
+  string anchor = 2;
+  string start = 3;
+  uint32 startOffset = 4;
+  string end = 5;
+  uint32 endOffset = 6;
+  string text = 7;
+}

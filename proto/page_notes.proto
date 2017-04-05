@@ -1,0 +1,9 @@
+syntax = "proto3";
+package hlcmsg;
+import "range_meta.proto";
+
+message PageNotes{
+  string uri = 1;
+  string user = 2;
+  repeated RangeMeta highlights = 3;
+}
