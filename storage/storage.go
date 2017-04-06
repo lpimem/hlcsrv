@@ -29,11 +29,7 @@ func QueryPagenoteByUrl(url string) PagenoteDict {
 	return notes
 }
 
-func QueryPagenote(uid uint32, url string) *hlcmsg.Pagenote {
-	pid := storage.QueryPageId(url)
-	if pid <= 0 {
-		pid = storage.NewPage("unknown", url)
-	}
+func QueryPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	notes, err := storage.QueryPagenote(uid, pid)
 	if err != nil {
 		util.Log("error QueryPagenote, uid:", uid, "pid:", pid, err)
@@ -62,10 +58,17 @@ func QueryPageId(url string) uint32 {
 	return id
 }
 
-func SavePagenote(pn *hlcmsg.Pagenote) uint32 {
+func SavePagenote(pn *hlcmsg.Pagenote) []error {
 	// storage.SavePagenote()
+	errs := []error{}
 	for _, hlt := range pn.Highlights {
-		storage.NewRangeMeta(pn.Uid, pn.Pageid, hlt)
+		id, err := storage.NewRangeMeta(pn.Uid, pn.Pageid, hlt)
+		if err != nil {
+			util.Log("Error saving new range meta", err)
+			errs = append(errs, err)
+		} else {
+			hlt.Id = id
+		}
 	}
-	return pn.Pageid
+	return errs
 }

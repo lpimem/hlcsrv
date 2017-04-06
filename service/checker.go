@@ -23,7 +23,7 @@ func RequirePost(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method == http.MethodPost {
 		return true
 	} else {
-		http.NotFound(w, r)
+		http.Error(w, "only post accepted", http.StatusBadRequest)
 		return false
 	}
 }
