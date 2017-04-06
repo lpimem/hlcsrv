@@ -1,35 +1,22 @@
 package service
 
-import (
-	"fmt"
-	"net/http"
+import "net/http"
 
-	"github.com/lpimem/hlcsrv/util"
-)
-
-/*Serve start listening http requests to the given ip and port
- */
-func Serve(ip string, port int64) {
+func MakeRoutes() *http.ServeMux {
 	mux := routes()
-	var server = http.Server{
-		Addr:    fmt.Sprintf("%s:%d", ip, port),
-		Handler: mux,
-	}
-	err := server.ListenAndServe()
-	if err != nil {
-		util.Log("Error: ", err)
-	}
+	return wrapProcessors(mux)
 }
 
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/pagenote/delete", deletePageNotes)
-	mux.HandleFunc("/pagenote", getPageNotes)
+	mux.HandleFunc("/pagenote/delete", deletePagenote)
+	mux.HandleFunc("/pagenote/new", savePagenote)
+	mux.HandleFunc("/pagenote", getPagenote)
 	mux.HandleFunc("/", index)
 	return mux
 }
 
-func wrap_processors(mux *http.ServeMux) *http.ServeMux {
+func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 	wrapper := http.NewServeMux()
 	wrapper.HandleFunc("/",
 		func(w http.ResponseWriter, r *http.Request) {
@@ -39,11 +26,6 @@ func wrap_processors(mux *http.ServeMux) *http.ServeMux {
 			mux.ServeHTTP(w, r)
 		})
 	return wrapper
-}
-
-func make_routes() *http.ServeMux {
-	mux := routes()
-	return wrap_processors(mux)
 }
 
 func init() {

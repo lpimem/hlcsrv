@@ -23,11 +23,11 @@ func TestQueryNotesByUidAndPid(t *testing.T) {
 	testQueryNotes(1, 1, "uid and pid", t)
 }
 
-func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.PageNotes) {
+func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.Pagenote) {
 	var err error
-	noteDict, err := storage.QueryPageNotes(uid, pid)
+	noteDict, err := storage.QueryPagenote(uid, pid)
 	if err != nil {
-		t.Error("cannot query pagenotes", msg, err)
+		t.Error("cannot query Pagenote", msg, err)
 		t.Fail()
 		return
 	}

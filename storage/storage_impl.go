@@ -31,11 +31,11 @@ func (s *SqliteStorage) Close() {
 	s.DB.Close()
 }
 
-type PageNoteDict map[uint32][]*hlcmsg.PageNotes
+type PageNoteDict map[uint32][]*hlcmsg.Pagenote
 
-func (d PageNoteDict) GetOrCreateNoteList(uid uint32) (notes []*hlcmsg.PageNotes) {
+func (d PageNoteDict) GetOrCreateNoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
 	if _, ok := d[uid]; !ok {
-		notes = []*hlcmsg.PageNotes{}
+		notes = []*hlcmsg.Pagenote{}
 		d[uid] = notes
 	} else {
 		notes = d[uid]
@@ -43,13 +43,13 @@ func (d PageNoteDict) GetOrCreateNoteList(uid uint32) (notes []*hlcmsg.PageNotes
 	return
 }
 
-func (d *PageNoteDict) AddNote(uid uint32, note *hlcmsg.PageNotes) {
+func (d *PageNoteDict) AddNote(uid uint32, note *hlcmsg.Pagenote) {
 	notes := d.GetOrCreateNoteList(uid)
 	notes = append(notes, note)
 	(*d)[uid] = notes
 }
 
-func (d *PageNoteDict) GetPageNote(uid uint32, pid uint32) *hlcmsg.PageNotes {
+func (d *PageNoteDict) GetPageNote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	notes := d.GetOrCreateNoteList(uid)
 	for _, n := range notes {
 		if n.Pageid == pid {
@@ -59,18 +59,18 @@ func (d *PageNoteDict) GetPageNote(uid uint32, pid uint32) *hlcmsg.PageNotes {
 	return nil
 }
 
-func (d *PageNoteDict) NewPageNote(uid uint32, pid uint32) *hlcmsg.PageNotes {
-	notes := &hlcmsg.PageNotes{
+func (d *PageNoteDict) NewPageNote(uid uint32, pid uint32) *hlcmsg.Pagenote {
+	note := &hlcmsg.Pagenote{
 		Pageid:     pid,
 		Uid:        uid,
 		Highlights: []*hlcmsg.RangeMeta{},
 	}
-	d.AddNote(uid, notes)
-	return notes
+	d.AddNote(uid, note)
+	return note
 }
 
 func (s *SqliteStorage) QueryMetas(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
-	dict, err := s.QueryPageNotes(uid, pid)
+	dict, err := s.QueryPagenote(uid, pid)
 	if err != nil {
 		util.Log("Error:", err)
 		return []*hlcmsg.RangeMeta{}
@@ -79,7 +79,7 @@ func (s *SqliteStorage) QueryMetas(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
 	}
 }
 
-func (s *SqliteStorage) QueryPageNotes(uid uint32, pid uint32) (PageNoteDict, error) {
+func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PageNoteDict, error) {
 	if uid == 0 && pid == 0 {
 		return PageNoteDict{}, errors.New("uid and url cannot both be 0")
 	}

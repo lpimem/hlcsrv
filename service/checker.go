@@ -18,3 +18,12 @@ func (builder ReqCookieCheckerBuilder) Build() RequestInterceptor {
 		return nil
 	}
 }
+
+func RequirePost(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method == http.MethodPost {
+		return true
+	} else {
+		http.NotFound(w, r)
+		return false
+	}
+}
