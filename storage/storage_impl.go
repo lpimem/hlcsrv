@@ -57,7 +57,11 @@ func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 			return n
 		}
 	}
-	return nil
+	util.Log("no pagenote found for", uid, pid)
+	return &hlcmsg.Pagenote{
+		Uid:    uid,
+		Pageid: pid,
+	}
 }
 
 func (d *PagenoteDict) NewPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {

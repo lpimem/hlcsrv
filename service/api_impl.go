@@ -102,6 +102,10 @@ func cleanUrl(urlstr string) string {
 
 func writeRespMessage(w http.ResponseWriter, m proto.Message) bool {
 	am, err := ptypes.MarshalAny(m)
+	if err != nil {
+		util.Log("Error marshalling message", err)
+		return false
+	}
 	resp := &hlcmsg.HlcResp{
 		Code:     hlcmsg.HlcResp_SUC,
 		Msg:      "sucess",

@@ -2,7 +2,9 @@ package service
 
 import "net/http"
 
-func index(w http.ResponseWriter, req *http.Request) {}
+func index(w http.ResponseWriter, req *http.Request) {
+	http.NotFound(w, req)
+}
 
 func getPagenote(w http.ResponseWriter, req *http.Request) {
 	pn := parseGetNotesRequest(req)
