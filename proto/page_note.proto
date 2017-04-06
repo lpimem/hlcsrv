@@ -6,4 +6,5 @@ message Pagenote{
   uint32 pageid = 1;
   uint32 uid = 2;
   repeated RangeMeta highlights = 3;
+  string url = 4;
 }

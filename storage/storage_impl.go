@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	// ignore warning
 	_ "github.com/mattn/go-sqlite3"
 
 	"bytes"
@@ -31,9 +32,9 @@ func (s *SqliteStorage) Close() {
 	s.DB.Close()
 }
 
-type PageNoteDict map[uint32][]*hlcmsg.Pagenote
+type PagenoteDict map[uint32][]*hlcmsg.Pagenote
 
-func (d PageNoteDict) GetOrCreateNoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
+func (d PagenoteDict) GetOrCreatePagenoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
 	if _, ok := d[uid]; !ok {
 		notes = []*hlcmsg.Pagenote{}
 		d[uid] = notes
@@ -43,14 +44,14 @@ func (d PageNoteDict) GetOrCreateNoteList(uid uint32) (notes []*hlcmsg.Pagenote)
 	return
 }
 
-func (d *PageNoteDict) AddNote(uid uint32, note *hlcmsg.Pagenote) {
-	notes := d.GetOrCreateNoteList(uid)
+func (d *PagenoteDict) AddPagenote(uid uint32, note *hlcmsg.Pagenote) {
+	notes := d.GetOrCreatePagenoteList(uid)
 	notes = append(notes, note)
 	(*d)[uid] = notes
 }
 
-func (d *PageNoteDict) GetPageNote(uid uint32, pid uint32) *hlcmsg.Pagenote {
-	notes := d.GetOrCreateNoteList(uid)
+func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
+	notes := d.GetOrCreatePagenoteList(uid)
 	for _, n := range notes {
 		if n.Pageid == pid {
 			return n
@@ -59,29 +60,29 @@ func (d *PageNoteDict) GetPageNote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	return nil
 }
 
-func (d *PageNoteDict) NewPageNote(uid uint32, pid uint32) *hlcmsg.Pagenote {
+func (d *PagenoteDict) NewPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	note := &hlcmsg.Pagenote{
 		Pageid:     pid,
 		Uid:        uid,
 		Highlights: []*hlcmsg.RangeMeta{},
 	}
-	d.AddNote(uid, note)
+	d.AddPagenote(uid, note)
 	return note
 }
 
-func (s *SqliteStorage) QueryMetas(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
+func (s *SqliteStorage) QueryMetaList(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
 	dict, err := s.QueryPagenote(uid, pid)
 	if err != nil {
 		util.Log("Error:", err)
 		return []*hlcmsg.RangeMeta{}
 	} else {
-		return dict.GetPageNote(uid, pid).GetHighlights()
+		return dict.GetPagenote(uid, pid).GetHighlights()
 	}
 }
 
-func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PageNoteDict, error) {
+func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, error) {
 	if uid == 0 && pid == 0 {
-		return PageNoteDict{}, errors.New("uid and url cannot both be 0")
+		return PagenoteDict{}, errors.New("uid and url cannot both be 0")
 	}
 	var queryBuilder bytes.Buffer
 	queryBuilder.WriteString(`select id, anchor, start, startOffset, end, endOffset, page, author from hlc_range where 1=1 `)
@@ -95,17 +96,17 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PageNoteDict, err
 		parameters = append(parameters, pid)
 	}
 	var query = queryBuilder.String()
-	result := PageNoteDict{}
-	err := QueryDb(s.DB, query, parameters, func(rowno int, rows *sql.Rows) error {
+	result := PagenoteDict{}
+	err := util.QueryDb(s.DB, query, parameters, func(rowno int, rows *sql.Rows) error {
 		var id, startOffset, endOffset, page, author uint32
 		var anchor, start, end string
 		err := rows.Scan(&id, &anchor, &start, &startOffset, &end, &endOffset, &page, &author)
 		if err != nil {
 			return err
 		}
-		note := result.GetPageNote(author, page)
+		note := result.GetPagenote(author, page)
 		if note == nil {
-			note = result.NewPageNote(author, page)
+			note = result.NewPagenote(author, page)
 		}
 		meta := &hlcmsg.RangeMeta{
 			Id:          id,
@@ -141,7 +142,7 @@ func (s *SqliteStorage) DeleteRangeMeta(id uint32) error {
 
 func (s *SqliteStorage) QueryPageId(url string) uint32 {
 	var id uint32
-	err := QueryDb(s.DB,
+	err := util.QueryDb(s.DB,
 		"select id from hlc_page where url = ?",
 		[]interface{}{url},
 		func(rowno int, rows *sql.Rows) error {
@@ -165,8 +166,10 @@ func (s *SqliteStorage) NewPage(title, url string) (id uint32) {
 	lastId, err := rst.LastInsertId()
 	if err != nil {
 		util.Log("ignored error:", err)
+		id = 0
+	} else {
+		id = uint32(lastId)
 	}
-	id = uint32(lastId)
 	return
 }
 
@@ -191,7 +194,7 @@ func (s *SqliteStorage) NewUser(name, email, password, slt string) (id uint32) {
 func (s *SqliteStorage) QueryUser(handle, password string) (id uint32) {
 	const active = 1
 	query := `select id from hlc_user where _status = ? and ((name=? and password=?) or (email=? and password=?)) `
-	err := QueryDb(s.DB, query,
+	err := util.QueryDb(s.DB, query,
 		[]interface{}{active, handle, password, handle, password},
 		func(idx int, rows *sql.Rows) error {
 			return rows.Scan(&id)
@@ -229,58 +232,4 @@ func prepareSQLDb(path string) (*sql.DB, error) {
 		}
 	}
 	return db, nil
-}
-
-func InTxWithDB(db *sql.DB, ops []func(tx *sql.Tx) error) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-	return WithInTx(tx, ops)
-}
-
-func WithInTx(tx *sql.Tx, ops []func(tx *sql.Tx) error) error {
-	for _, op := range ops {
-		if err := op(tx); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func QueryDb(db *sql.DB, query string, args []interface{}, handler func(rowNo int, rows *sql.Rows) error) error {
-	rows, err := db.Query(query, args...)
-	return iterateRows(rows, err, handler)
-
-}
-
-func QueryTx(tx *sql.DB, query string, args []interface{}, handler func(rowNo int, rows *sql.Rows) error) error {
-	rows, err := tx.Query(query, args...)
-	return iterateRows(rows, err, handler)
-}
-
-func iterateRows(rows *sql.Rows, err error, handler func(rowNo int, rows *sql.Rows) error) error {
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-	var current = 0
-	for rows.Next() {
-		err = handler(current, rows)
-		if err != nil {
-			return err
-		}
-		current += 1
-	}
-	if err = rows.Err(); err != nil {
-		return err
-	}
-	return nil
 }

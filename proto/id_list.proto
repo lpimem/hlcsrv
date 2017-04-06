@@ -1,0 +1,6 @@
+syntax = "proto3";
+package hlcmsg;
+
+message IdList{
+  repeated uint32 arr = 1;
+}

@@ -20,7 +20,7 @@ func QueryPagenoteByUser(uid uint32) []*hlcmsg.Pagenote {
 	return notes[uid]
 }
 
-func QueryPagenoteByUrl(url string) PageNoteDict {
+func QueryPagenoteByUrl(url string) PagenoteDict {
 	pid := storage.QueryPageId(url)
 	notes, err := storage.QueryPagenote(0, pid)
 	if err != nil {
@@ -29,17 +29,17 @@ func QueryPagenoteByUrl(url string) PageNoteDict {
 	return notes
 }
 
-func QueryPageNote(uid uint32, url string) *hlcmsg.Pagenote {
+func QueryPagenote(uid uint32, url string) *hlcmsg.Pagenote {
 	pid := storage.QueryPageId(url)
 	if pid <= 0 {
 		pid = storage.NewPage("unknown", url)
 	}
 	notes, err := storage.QueryPagenote(uid, pid)
 	if err != nil {
-		util.Log("error QueryPageNote, uid:", uid, "pid:", pid, err)
+		util.Log("error QueryPagenote, uid:", uid, "pid:", pid, err)
 		return nil
 	}
-	return notes.GetPageNote(uid, pid)
+	return notes.GetPagenote(uid, pid)
 }
 
 func DeleteRangeMetas(idList []uint32) {
@@ -49,4 +49,23 @@ func DeleteRangeMetas(idList []uint32) {
 			util.Log("error cannot delete RangeMeta", id, err)
 		}
 	}
+}
+
+func QueryPageId(url string) uint32 {
+	id := storage.QueryPageId(url)
+	if id < 0 {
+		id = storage.NewPage("", url)
+	}
+	if id < 0 {
+		id = storage.QueryPageId(url)
+	}
+	return id
+}
+
+func SavePagenote(pn *hlcmsg.Pagenote) uint32 {
+	// storage.SavePagenote()
+	for _, hlt := range pn.Highlights {
+		storage.NewRangeMeta(pn.Uid, pn.Pageid, hlt)
+	}
+	return pn.Pageid
 }

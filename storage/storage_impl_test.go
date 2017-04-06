@@ -32,7 +32,7 @@ func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.
 		return
 	}
 	if uid > 0 {
-		notes = noteDict.GetOrCreateNoteList(uid)
+		notes = noteDict.GetOrCreatePagenoteList(uid)
 	} else {
 		for _, uidNotes := range noteDict {
 			notes = uidNotes
@@ -54,7 +54,7 @@ func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.
 func TestNewRangeMeta(t *testing.T) {
 	resetDb()
 	var err error
-	metas := storage.QueryMetas(1, 1)
+	metas := storage.QueryMetaList(1, 1)
 	if len(metas) < 1 {
 		t.Error("should be able to query 1 meta")
 		t.Fail()
@@ -75,7 +75,7 @@ func TestNewRangeMeta(t *testing.T) {
 		t.Fail()
 		return
 	}
-	metas = storage.QueryMetas(1, 1)
+	metas = storage.QueryMetaList(1, 1)
 	if len(metas) < 2 {
 		t.Error("should be able to query 2 metas, actually got ", metas)
 		t.Fail()
@@ -85,7 +85,7 @@ func TestNewRangeMeta(t *testing.T) {
 
 func TestDeleteRangeMeta(t *testing.T) {
 	resetDb()
-	metas := storage.QueryMetas(1, 1)
+	metas := storage.QueryMetaList(1, 1)
 	count := len(metas)
 	if count < 1 {
 		t.Error("should be able to query 1 meta")
@@ -98,7 +98,7 @@ func TestDeleteRangeMeta(t *testing.T) {
 		t.Fail()
 		return
 	}
-	metas = storage.QueryMetas(1, 1)
+	metas = storage.QueryMetaList(1, 1)
 	if len(metas) >= count {
 		t.Error("rangemeta is not deleted ", metas[0].Id)
 		t.Fail()

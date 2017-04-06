@@ -26,7 +26,7 @@ type RangeMeta struct {
 func (m *RangeMeta) Reset()                    { *m = RangeMeta{} }
 func (m *RangeMeta) String() string            { return proto.CompactTextString(m) }
 func (*RangeMeta) ProtoMessage()               {}
-func (*RangeMeta) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
+func (*RangeMeta) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{0} }
 
 func (m *RangeMeta) GetId() uint32 {
 	if m != nil {
@@ -81,9 +81,9 @@ func init() {
 	proto.RegisterType((*RangeMeta)(nil), "hlcmsg.RangeMeta")
 }
 
-func init() { proto.RegisterFile("range_meta.proto", fileDescriptor2) }
+func init() { proto.RegisterFile("range_meta.proto", fileDescriptor3) }
 
-var fileDescriptor2 = []byte{
+var fileDescriptor3 = []byte{
 	// 173 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x4c, 0x8f, 0x4d, 0x0a, 0xc2, 0x30,
 	0x10, 0x46, 0x49, 0x7f, 0x22, 0x1d, 0x51, 0xca, 0x20, 0x92, 0x85, 0x8b, 0xe2, 0xaa, 0x2b, 0x37,

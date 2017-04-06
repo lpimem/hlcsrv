@@ -7,11 +7,13 @@ Package hlcmsg is a generated protocol buffer package.
 
 It is generated from these files:
 	hlc_resp.proto
+	id_list.proto
 	page_note.proto
 	range_meta.proto
 
 It has these top-level messages:
 	HlcResp
+	IdList
 	Pagenote
 	RangeMeta
 */
