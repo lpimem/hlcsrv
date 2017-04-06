@@ -1,17 +1,18 @@
 package service
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/url"
-
-	"io/ioutil"
-
 	"strconv"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/storage"
 	"github.com/lpimem/hlcsrv/util"
+
+	google_protobuf "github.com/golang/protobuf/ptypes/any"
 )
 
 func newNotes(pn *hlcmsg.Pagenote) *hlcmsg.IdList {
@@ -100,7 +101,13 @@ func cleanUrl(urlstr string) string {
 }
 
 func writeRespMessage(w http.ResponseWriter, m proto.Message) bool {
-	buf, err := proto.Marshal(m)
+	am, err := ptypes.MarshalAny(m)
+	resp := &hlcmsg.HlcResp{
+		Code:     hlcmsg.HlcResp_SUC,
+		Msg:      "sucess",
+		Payloads: []*google_protobuf.Any{am},
+	}
+	buf, err := proto.Marshal(resp)
 	if err != nil {
 		util.Log("Error: cannot encode message ", m, err)
 		return false
