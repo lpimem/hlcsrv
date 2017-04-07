@@ -15,6 +15,8 @@ RESET=`tput sgr0`
 
 TEST_RESULT=$TESTDIR/test_result
 
+./test_setup.sh 1
+
 for d in */ ; do
   tc=${d%/}
   pushd $tc > /dev/null
@@ -40,6 +42,8 @@ for d in */ ; do
     echo -e "${color} $msg ${RESET}"
   fi 
 done 
+
+./test_setup.sh 2
 
 rm $TEST_RESULT
 exit $suc

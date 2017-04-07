@@ -1,6 +1,44 @@
 package service
 
 import "testing"
+import "github.com/lpimem/hlcsrv/hlcmsg"
+import "github.com/lpimem/hlcsrv/storage"
+
+func testGetPagenote(t *testing.T, uid uint32, pid uint32, count uint32) {
+	storage.ResetTestDb()
+	req := &hlcmsg.Pagenote{
+		Uid:    uid,
+		Pageid: pid,
+	}
+	note := getNotes(req)
+	if count == 0 {
+		if note != nil {
+			t.Error("expecting nil, got", note)
+			t.Fail()
+		}
+		return
+	}
+	if note == nil {
+		t.Error("note should be not nil")
+		t.Fail()
+		return
+	}
+	if len(note.Highlights) != int(count) {
+		t.Error("note should contain", count, "highlights")
+		t.Fail()
+		return
+	}
+}
+
+func TestGetNote(t *testing.T) {
+	for _, tc := range [][]uint32{
+		[]uint32{1, 0, 1},
+		[]uint32{1, 1, 1},
+		[]uint32{2, 1, 0},
+	} {
+		testGetPagenote(t, tc[0], tc[1], tc[2])
+	}
+}
 
 func TestCleanUrl(t *testing.T) {
 	tcs := [][]string{

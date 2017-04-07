@@ -35,7 +35,7 @@ func (d *PagenoteDict) AddPagenote(uid uint32, note *hlcmsg.Pagenote) {
 func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	notes := d.getOrCreatePagenoteList(uid)
 	for _, n := range notes {
-		if n.Pageid == pid {
+		if pid == 0 || n.Pageid == pid {
 			return n
 		}
 	}

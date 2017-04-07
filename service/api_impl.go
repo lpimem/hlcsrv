@@ -20,16 +20,20 @@ func newNotes(pn *hlcmsg.Pagenote) *hlcmsg.IdList {
 func getNotes(pn *hlcmsg.Pagenote) *hlcmsg.Pagenote {
 	if pn.Uid > 0 {
 		return storage.QueryPagenote(pn.Uid, pn.Pageid)
-	} else {
-		util.Log("error, empty uid not supported")
-		return nil
 	}
+	util.Log("error, empty uid not supported")
+	return nil
 }
 
 func parseNewNotesRequest(r *http.Request) *hlcmsg.Pagenote {
 	pn := &hlcmsg.Pagenote{}
 	payload, err := readRequestPayload(r)
 	if err != nil {
+		util.Debug("error loading payload", err)
+		return nil
+	}
+	if payload == nil || len(payload) == 0 {
+		util.Debug("empty payload", err)
 		return nil
 	}
 	if err = proto.Unmarshal(payload, pn); err != nil {

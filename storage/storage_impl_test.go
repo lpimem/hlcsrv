@@ -5,21 +5,20 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 func TestQueryNotesByUID(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	testQueryNotes(1, 0, "uid", t)
 }
 
 func TestQueryNotesByPid(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	testQueryNotes(0, 1, "pid", t)
 }
 
 func TestQueryNotesByUidAndPid(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	testQueryNotes(1, 1, "uid and pid", t)
 }
 
@@ -57,7 +56,7 @@ func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.
 }
 
 func TestNewRangeMeta(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	var err error
 	metas := storage.QueryMetaList(1, 1)
 	if len(metas) < 1 {
@@ -89,7 +88,7 @@ func TestNewRangeMeta(t *testing.T) {
 }
 
 func TestDeleteRangeMeta(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	metas := storage.QueryMetaList(1, 1)
 	count := len(metas)
 	if count < 1 {
@@ -112,7 +111,7 @@ func TestDeleteRangeMeta(t *testing.T) {
 }
 
 func TestQueryPageId(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	pid := storage.QueryPageId("example.com")
 	if pid != 1 {
 		t.Error("Should get 1 for page id, but got", pid)
@@ -126,7 +125,7 @@ func TestQueryPageId(t *testing.T) {
 }
 
 func TestNewPage(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	url := "http://new.example.com"
 	pid := storage.NewPage("test", url)
 	if pid < 1 {
@@ -141,7 +140,7 @@ func TestNewPage(t *testing.T) {
 }
 
 func TestQueryUser(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	uname := "Bob"
 	uemail := "bob@example.com"
 	passwd := "unsafe"
@@ -158,7 +157,7 @@ func TestQueryUser(t *testing.T) {
 }
 
 func TestNewUser(t *testing.T) {
-	resetDb()
+	ResetTestDb()
 	uname := "Alice"
 	email := "alice@example.com"
 	passwd := "unsafe"
@@ -179,47 +178,6 @@ func TestNewUser(t *testing.T) {
 	}
 }
 
-func InitTestDb() {
-	InitStorage(util.GetAbsRunDirPath() + "/db/test.db")
-	err := CleanDb()
-	if err != nil {
-		panic(err)
-	}
-	err = SeedTestDb()
-	if err != nil {
-		panic(err)
-	}
-}
-
-func CleanDb() error {
-	_, err := storage.DB.Exec(`
-	delete from hlc_range;
-	delete from hlc_user;
-	delete from hlc_page;
-	delete from hlc_comments;
-	`)
-	return err
-}
-
-func SeedTestDb() error {
-	_, err := storage.DB.Exec(`
-	insert into hlc_user(id, name, email, password, _slt) 
-		values (1, "Bob", "bob@example.com", "unsafe", "unsafe");
-
-	insert into hlc_page(id, title, url)
-		values (1, "example", "example.com");
-
-	insert into hlc_range(id, anchor, start, startOffset, end, endOffset, text, page, author)
-		values (1, "#c", "#c/1", 0, "#c/12", 32, "This is the selected text", 1, 1);
-	`)
-	return err
-}
-
-func resetDb() {
-	CleanDb()
-	SeedTestDb()
-}
-
 func init() {
-	InitTestDb()
+	ResetTestDb()
 }

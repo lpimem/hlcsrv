@@ -8,6 +8,10 @@ import (
 var storage *SqliteStorage = nil
 
 func InitStorage(path string) {
+	if storage != nil {
+		util.Log("WARN:", path, "is not inited as storage as storage was already registered at ", storage.path)
+		return
+	}
 	storage = NewSqliteStorage(path)
 }
 

@@ -2,15 +2,17 @@ package service
 
 import "net/http"
 
-type ReqCookieCheckerBuilder []string
+type ReqCookieCheckerBuilder struct {
+	headers []string
+}
 
-func (builder ReqCookieCheckerBuilder) Require(key string) {
-	builder = append(builder, key)
+func (builder *ReqCookieCheckerBuilder) Require(key string) {
+	builder.headers = append(builder.headers, key)
 }
 
 func (builder ReqCookieCheckerBuilder) Build() RequestInterceptor {
 	return func(req *http.Request) error {
-		for _, expect := range builder {
+		for _, expect := range builder.headers {
 			if _, err := req.Cookie(expect); err != nil {
 				return err
 			}
@@ -22,8 +24,7 @@ func (builder ReqCookieCheckerBuilder) Build() RequestInterceptor {
 func RequirePost(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method == http.MethodPost {
 		return true
-	} else {
-		http.Error(w, "only post accepted", http.StatusBadRequest)
-		return false
 	}
+	http.Error(w, "only post accepted", http.StatusBadRequest)
+	return false
 }
