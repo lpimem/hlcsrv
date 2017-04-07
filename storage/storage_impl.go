@@ -32,48 +32,6 @@ func (s *SqliteStorage) Close() {
 	s.DB.Close()
 }
 
-type PagenoteDict map[uint32][]*hlcmsg.Pagenote
-
-func (d PagenoteDict) GetOrCreatePagenoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
-	if _, ok := d[uid]; !ok {
-		notes = []*hlcmsg.Pagenote{}
-		d[uid] = notes
-	} else {
-		notes = d[uid]
-	}
-	return
-}
-
-func (d *PagenoteDict) AddPagenote(uid uint32, note *hlcmsg.Pagenote) {
-	notes := d.GetOrCreatePagenoteList(uid)
-	notes = append(notes, note)
-	(*d)[uid] = notes
-}
-
-func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
-	notes := d.GetOrCreatePagenoteList(uid)
-	for _, n := range notes {
-		if n.Pageid == pid {
-			return n
-		}
-	}
-	util.Log("no pagenote found for", uid, pid)
-	return &hlcmsg.Pagenote{
-		Uid:    uid,
-		Pageid: pid,
-	}
-}
-
-func (d *PagenoteDict) NewPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
-	note := &hlcmsg.Pagenote{
-		Pageid:     pid,
-		Uid:        uid,
-		Highlights: []*hlcmsg.RangeMeta{},
-	}
-	d.AddPagenote(uid, note)
-	return note
-}
-
 func (s *SqliteStorage) QueryMetaList(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
 	dict, err := s.QueryPagenote(uid, pid)
 	if err != nil {
@@ -100,6 +58,8 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, err
 		parameters = append(parameters, pid)
 	}
 	var query = queryBuilder.String()
+	util.Debug(query)
+	util.Debug(parameters...)
 	result := PagenoteDict{}
 	err := util.QueryDb(s.DB, query, parameters, func(rowno int, rows *sql.Rows) error {
 		var id, startOffset, endOffset, page, author uint32

@@ -32,15 +32,20 @@ func testQueryNotes(uid, pid uint32, msg string, t *testing.T) (notes []*hlcmsg.
 		return
 	}
 	if uid > 0 {
-		notes = noteDict.GetOrCreatePagenoteList(uid)
+		notes = noteDict.GetPagenoteList(uid)
 	} else {
 		for _, uidNotes := range noteDict {
 			notes = uidNotes
 			break
 		}
 	}
+	if notes == nil {
+		t.Error("queried notes shouldn't be nil for uid", uid)
+		t.Fail()
+		return
+	}
 	if len(notes) < 1 {
-		t.Error("queried pagenote dict is empty", msg, notes)
+		t.Error("queried pagenote list is empty", msg, notes)
 		t.Fail()
 		return
 	}
