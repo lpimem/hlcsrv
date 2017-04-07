@@ -51,6 +51,7 @@ func QueryPageId(url string) uint32 {
 	id := storage.QueryPageId(url)
 	if id < 0 {
 		id = storage.NewPage("", url)
+		util.Debug("new page id", id, url)
 	}
 	if id < 0 {
 		id = storage.QueryPageId(url)
@@ -61,6 +62,7 @@ func QueryPageId(url string) uint32 {
 func SavePagenote(pn *hlcmsg.Pagenote) []error {
 	// storage.SavePagenote()
 	errs := []error{}
+	util.Debug(len(pn.Highlights), " blocks to save")
 	for _, hlt := range pn.Highlights {
 		id, err := storage.NewRangeMeta(pn.Uid, pn.Pageid, hlt)
 		if err != nil {

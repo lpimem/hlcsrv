@@ -1,8 +1,10 @@
 package service
 
 import "net/http"
+import "bytes"
 
 func index(w http.ResponseWriter, req *http.Request) {
+	w.Write(bytes.NewBufferString("sorry, ").Bytes())
 	http.NotFound(w, req)
 }
 
@@ -17,7 +19,7 @@ func getPagenote(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "cannot get notes", http.StatusBadGateway)
 		return
 	}
-	writeRespMessage(w, pn)
+	writeRespMessage(w, pn, nil)
 }
 
 func savePagenote(w http.ResponseWriter, req *http.Request) {
@@ -30,7 +32,7 @@ func savePagenote(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	idList := newNotes(pn)
-	writeRespMessage(w, idList)
+	writeRespMessage(w, nil, idList)
 }
 
 func deletePagenote(w http.ResponseWriter, req *http.Request) {

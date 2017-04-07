@@ -20,11 +20,13 @@ for d in */ ; do
   pushd $tc > /dev/null
   go test -v --ldflags -s -o $TESTDIR/$tc.test ../$tc > $TEST_RESULT 2>&1
   ret=$?
+  suc=0
   popd > /dev/null
   msg=`cat $TEST_RESULT`
   if [[ $msg != *"can't load package"* ]]; then
     if [[ $ret == 1 ]]; then 
       color=$RED
+      suc=1
     else
       if [[ $msg == "?"* ]]; then 
         color=$YELLOW
@@ -32,6 +34,7 @@ for d in */ ; do
         color=$GREEN
       else 
         color=$RED
+        suc=1
       fi 
     fi 
     echo -e "${color} $msg ${RESET}"
@@ -39,3 +42,4 @@ for d in */ ; do
 done 
 
 rm $TEST_RESULT
+exit $suc

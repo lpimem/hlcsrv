@@ -24,10 +24,12 @@ func _init() {
 
 func serve(ip string, port int64) {
 	mux := service.MakeRoutes()
+	addr := fmt.Sprintf("%s:%d", ip, port)
 	var server = http.Server{
-		Addr:    fmt.Sprintf("%s:%d", ip, port),
+		Addr:    addr,
 		Handler: mux,
 	}
+	fmt.Println("listening at", addr)
 	err := server.ListenAndServe()
 	if err != nil {
 		util.Log("Error: ", err)

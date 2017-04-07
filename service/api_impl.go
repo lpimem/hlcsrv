@@ -7,12 +7,9 @@ import (
 	"strconv"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/storage"
 	"github.com/lpimem/hlcsrv/util"
-
-	google_protobuf "github.com/golang/protobuf/ptypes/any"
 )
 
 func newNotes(pn *hlcmsg.Pagenote) *hlcmsg.IdList {
@@ -100,20 +97,19 @@ func cleanUrl(urlstr string) string {
 	return u.String()
 }
 
-func writeRespMessage(w http.ResponseWriter, m proto.Message) bool {
-	am, err := ptypes.MarshalAny(m)
-	if err != nil {
-		util.Log("Error marshalling message", err)
-		return false
-	}
+func writeRespMessage(w http.ResponseWriter, pn *hlcmsg.Pagenote, idlist *hlcmsg.IdList) bool {
 	resp := &hlcmsg.HlcResp{
-		Code:     hlcmsg.HlcResp_SUC,
-		Msg:      "sucess",
-		Payloads: []*google_protobuf.Any{am},
+		Code:         hlcmsg.HlcResp_SUC,
+		Msg:          "sucess",
+		PagenoteList: []*hlcmsg.Pagenote{},
+		IdList:       idlist,
+	}
+	if pn != nil {
+		resp.PagenoteList = append(resp.PagenoteList, pn)
 	}
 	buf, err := proto.Marshal(resp)
 	if err != nil {
-		util.Log("Error: cannot encode message ", m, err)
+		util.Log("Error: cannot encode message ", resp, err)
 		return false
 	}
 	if _, err = w.Write(buf); err != nil {
