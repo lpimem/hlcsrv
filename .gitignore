@@ -3,3 +3,5 @@ testBuild
 db/*.db
 .vscode
 .idea
+static/*.js
+static/*.map

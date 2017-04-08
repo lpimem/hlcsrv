@@ -28,7 +28,7 @@ func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) bool {
 	for _, handle := range interceptors {
 		err := handle(req)
 		if err != nil {
-			http.Error(respWriter, err.Error(), 500)
+			http.Error(respWriter, err.Error(), http.StatusBadRequest)
 			return false
 		}
 	}
@@ -40,7 +40,7 @@ func buildDefaultInterceptors() {
 }
 
 func buildDefaultCookieChecker() {
-	var builder ReqCookieCheckerBuilder
-	builder.Require("uid")
-	AddRequestInterceptor(builder.Build())
+	//var builder ReqCookieCheckerBuilder
+	//builder.Require("uid")
+	//AddRequestInterceptor(builder.Build())
 }

@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"encoding/base64"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/storage"
@@ -116,10 +118,18 @@ func writeRespMessage(w http.ResponseWriter, pn *hlcmsg.Pagenote, idlist *hlcmsg
 		util.Log("Error: cannot encode message ", resp, err)
 		return false
 	}
-	if _, err = w.Write(buf); err != nil {
+
+	encoder := base64.NewEncoder(base64.StdEncoding, w)
+	defer encoder.Close()
+	_, err = encoder.Write(buf)
+	if err != nil {
 		util.Log("Error: cannot write message to response", err)
 		return false
 	}
+	//if _, err = w.Write(buf); err != nil {
+	//	util.Log("Error: cannot write message to response", err)
+	//	return false
+	//}
 	return true
 }
 

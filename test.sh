@@ -12,6 +12,8 @@ RED=`tput setaf 1`
 GREEN=`tput setaf 2`
 YELLOW=`tput setaf 3`
 RESET=`tput sgr0`
+White='\033[0;37m'
+GREY='\033[1;30m'
 
 TEST_RESULT=$TESTDIR/test_result
 
@@ -24,23 +26,32 @@ for d in */ ; do
   ret=$?
   suc=0
   popd > /dev/null
-  msg=`cat $TEST_RESULT`
-  if [[ $msg != *"can't load package"* ]]; then
-    if [[ $ret == 1 ]]; then 
-      color=$RED
-      suc=1
+
+  input="$TEST_RESULT"
+  while IFS= read -r msg
+  do
+    if [[ $msg != *"can't load package"* ]]; then
+        color=$GREY
+        if [[ $msg == "---"* ]]; then
+          if [[ $msg != "--- PASS"* ]]; then 
+            color=$RED
+          else 
+            color="${RESET}$GREY$GREEN"
+          fi
+        fi
+        if [[ $msg == "?"* ]]; then
+          color=$YELLOW
+        elif [[ $msg == "ok"* ]]; then
+          color="${RESET}$GREEN"
+        elif [[ $msg == "FAIL"* || $msg == *"should"* ]]; then
+          color=$RED
+          suc=1
+        fi
+      echo -e "${color}$msg"
     else
-      if [[ $msg == "?"* ]]; then 
-        color=$YELLOW
-      elif [[ $msg == *"ok"* ]]; then
-        color=$GREEN
-      else 
-        color=$RED
-        suc=1
-      fi 
-    fi 
-    echo -e "${color} $msg ${RESET}"
-  fi 
+      break
+    fi
+  done < "$input"
 done 
 
 ./test_setup.sh 2

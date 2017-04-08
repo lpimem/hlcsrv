@@ -4,6 +4,20 @@ import "testing"
 import "github.com/lpimem/hlcsrv/hlcmsg"
 import "github.com/lpimem/hlcsrv/storage"
 
+func TestNewNotes(t *testing.T) {
+	// newNotes(pn *hlcmsg.Pagenote) *hlcmsg.IdList
+	pn := mockPageNote()
+	idlist := newNotes(pn)
+	if idlist == nil {
+		t.Error("should received a valid idlist")
+		t.Fail()
+	}
+	if len(idlist.Arr) != 1 {
+		t.Error("idlist should contain 1 id")
+		t.Fail()
+	}
+}
+
 func testGetPagenote(t *testing.T, uid uint32, pid uint32, count uint32) {
 	storage.ResetTestDb()
 	req := &hlcmsg.Pagenote{
@@ -79,5 +93,22 @@ func TestCleanUrl(t *testing.T) {
 			t.Error("url not cleaned:", got)
 			t.Fail()
 		}
+	}
+}
+
+func mockPageNote() *hlcmsg.Pagenote {
+	return &hlcmsg.Pagenote{
+		Uid:    1,
+		Pageid: 1,
+		Url:    "http://example.com",
+		Highlights: []*hlcmsg.RangeMeta{
+			&hlcmsg.RangeMeta{
+				Anchor:      "/",
+				Start:       "/1",
+				StartOffset: 0,
+				End:         "/2",
+				EndOffset:   3,
+			},
+		},
 	}
 }
