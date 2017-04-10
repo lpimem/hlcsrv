@@ -39,5 +39,8 @@ func deletePagenote(w http.ResponseWriter, req *http.Request) {
 	if !RequirePost(w, req) {
 		return
 	}
-	http.NotFound(w, req)
+	idList := parseRemoveNotesRequest(req)
+	deleted := rmNotes(idList)
+	writeRespMessage(w, nil, deleted)
+
 }

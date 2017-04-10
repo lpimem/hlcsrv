@@ -1,12 +1,11 @@
 package service
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"encoding/base64"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
@@ -15,15 +14,28 @@ import (
 )
 
 func newNotes(pn *hlcmsg.Pagenote) *hlcmsg.IdList {
-	storage.SavePagenote(pn)
-	return getPagenoteMetaIds(pn)
+	if pn != nil {
+		storage.SavePagenote(pn)
+		return getPagenoteMetaIds(pn)
+	}
+	return nil
 }
 
 func getNotes(pn *hlcmsg.Pagenote) *hlcmsg.Pagenote {
-	if pn.Uid > 0 {
+	if pn != nil && pn.Uid > 0 {
 		return storage.QueryPagenote(pn.Uid, pn.Pageid)
 	}
 	util.Log("error, empty uid not supported")
+	return nil
+}
+
+func rmNotes(toRemove *hlcmsg.IdList) *hlcmsg.IdList {
+	if toRemove != nil && len(toRemove.Arr) > 0 {
+		deleted := storage.DeleteRangeMetas(toRemove.Arr)
+		return &hlcmsg.IdList{
+			Arr: deleted,
+		}
+	}
 	return nil
 }
 
@@ -46,7 +58,7 @@ func parseNewNotesRequest(r *http.Request) *hlcmsg.Pagenote {
 	return pn
 }
 
-func parseRemoveNotesRequest(r *http.Request) []uint32 {
+func parseRemoveNotesRequest(r *http.Request) *hlcmsg.IdList {
 	ids := &hlcmsg.IdList{}
 	payload, err := readRequestPayload(r)
 	if err != nil {
@@ -56,7 +68,7 @@ func parseRemoveNotesRequest(r *http.Request) []uint32 {
 		util.Log("Cannot parse IdList", err)
 		return nil
 	}
-	return ids.Arr
+	return ids
 }
 
 func parseGetNotesRequest(r *http.Request) *hlcmsg.Pagenote {

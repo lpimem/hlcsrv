@@ -42,13 +42,17 @@ func QueryPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	return notes.GetPagenote(uid, pid)
 }
 
-func DeleteRangeMetas(idList []uint32) {
+func DeleteRangeMetas(idList []uint32) []uint32 {
+	deleted := []uint32{}
 	for _, id := range idList {
 		err := storage.DeleteRangeMeta(id)
 		if err != nil {
 			util.Log("error cannot delete RangeMeta", id, err)
+		} else {
+			deleted = append(deleted, id)
 		}
 	}
+	return deleted
 }
 
 func QueryPageId(url string) uint32 {
