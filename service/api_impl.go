@@ -78,7 +78,7 @@ func parseGetNotesRequest(r *http.Request) *hlcmsg.Pagenote {
 		util.Log("error cannot extract uid from request", err)
 		return nil
 	}
-	uri := params.Get("uri")
+	uri := params.Get("url")
 	pn := &hlcmsg.Pagenote{}
 	pn.Uid = uint32(uid)
 	pn.Url = uri
@@ -96,7 +96,9 @@ func readRequestPayload(r *http.Request) ([]byte, error) {
 
 func patchPageId(pn *hlcmsg.Pagenote) {
 	if pn.Pageid < 1 {
+		util.Debug("Cleaing url:", pn.Url)
 		pn.Url = cleanUrl(pn.Url)
+		util.Debug("Cleaned url:", pn.Url)
 		pn.Pageid = storage.QueryPageId(pn.Url)
 	}
 }

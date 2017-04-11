@@ -1,6 +1,8 @@
 package util
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func InTxWithDB(db *sql.DB, ops []func(tx *sql.Tx) error) error {
 	tx, err := db.Begin()
@@ -27,6 +29,8 @@ func WithInTx(tx *sql.Tx, ops []func(tx *sql.Tx) error) error {
 }
 
 func QueryDb(db *sql.DB, query string, args []interface{}, handler func(rowNo int, rows *sql.Rows) error) error {
+	Debug(query)
+	Debug(args...)
 	rows, err := db.Query(query, args...)
 	return iterateRows(rows, err, handler)
 

@@ -58,8 +58,6 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, err
 		parameters = append(parameters, pid)
 	}
 	var query = queryBuilder.String()
-	util.Debug(query)
-	util.Debug(parameters...)
 	result := PagenoteDict{}
 	err := util.QueryDb(s.DB, query, parameters, func(rowno int, rows *sql.Rows) error {
 		var id, startOffset, endOffset, page, author uint32
