@@ -1,6 +1,9 @@
 package storage
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestSqliteStorage_QueryUidByGoogleId(t *testing.T) {
 	ResetTestDb()
@@ -35,5 +38,37 @@ func TestSqliteStorage_NewUserByGoogleId(t *testing.T) {
 		t.Error("Should report error for duplicated gid")
 		t.Fail()
 		return
+	}
+}
+
+func TestGetOrCreateUidForGoogleUser(t *testing.T) {
+	ResetTestDb()
+	var (
+		uid uint32
+		err error
+	)
+	uid, err = GetOrCreateUidForGoogleUser("100000", "abc@example.com")
+	if uid != 1 || err != nil {
+		t.Error("should return uid 1, got:", uid, err)
+		t.Fail()
+	}
+
+	uid, err = GetOrCreateUidForGoogleUser("100010", "abc2@example.com")
+	if uid < 1 || err != nil {
+		t.Error("should return uid > 0, got:", uid, err)
+		t.Fail()
+	}
+
+	uid_2, err := GetOrCreateUidForGoogleUser("100010", "abc2@example.com")
+	if uid_2 != uid || err != nil {
+		t.Error("should return uid=", uid, "got:", uid_2, err)
+		t.Fail()
+	}
+
+	uid, err = GetOrCreateUidForGoogleUser("100012", "abc2@example.com")
+	fmt.Println("expected msg for duplicated email:", err)
+	if err == nil {
+		t.Error("should raise error for duplicated email, got", uid, err)
+		t.Fail()
 	}
 }

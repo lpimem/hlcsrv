@@ -9,6 +9,24 @@ import (
 	"github.com/lpimem/hlcsrv/util"
 )
 
+func GetOrCreateUidForGoogleUser(
+	gid, email string,
+) (uint32, error) {
+	var uid uint32
+	var err error
+	uid = storage.QueryUidByGoogleId(gid)
+	if uid < 1 {
+		uid, err = storage.NewUserByGoogleId(gid, email)
+		if err != nil {
+			uid = storage.QueryUidByGoogleId(gid)
+			if uid > 0 {
+				err = nil
+			}
+		}
+	}
+	return uid, err
+}
+
 func (s *SqliteStorage) QueryUidByGoogleId(gid string) uint32 {
 	const query = "select uid from hlc_google_auth where google_id=?"
 	var id uint64
