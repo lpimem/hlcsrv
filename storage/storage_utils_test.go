@@ -20,6 +20,7 @@ func cleanDb() error {
 	delete from hlc_user;
 	delete from hlc_page;
 	delete from hlc_comments;
+	delete from hlc_google_auth;
 	`)
 	return err
 }
@@ -34,6 +35,8 @@ func seedTestDb() error {
 
 	insert into hlc_range(id, anchor, start, startOffset, end, endOffset, text, page, author)
 		values (1, "#c", "#c/1", 0, "#c/12", 32, "This is the selected text", 1, 1);
+
+	insert into hlc_google_auth(google_id, uid) values ("100000", 1);
 	`)
 	return err
 }

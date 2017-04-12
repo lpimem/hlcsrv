@@ -3,10 +3,10 @@
 
 create table if not exists `hlc_user`(
   `id` integer primary key,
-  `name` varchar(256) not null,
+  `name` varchar(256) null,
   `email` varchar(1024) not null,
-  `password` varchar(256) not null,
-  `_slt` varchar(256) not null,
+  `password` varchar(512) null,
+  `_slt` varchar(512) not null,
   `_status` integer default 1,
   `ctime` timestamp default current_timestamp,
   `mtime` timestamp default current_timestamp

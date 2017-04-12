@@ -12,6 +12,7 @@ func InitStorage(path string) {
 		util.Log("WARN:", path, "is not inited as storage as storage was already registered at ", storage.path)
 		return
 	}
+	util.Log("using database @", path)
 	storage = NewSqliteStorage(path)
 }
 
