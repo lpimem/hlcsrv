@@ -44,20 +44,7 @@ func TestNewPagenoteNoEmptyReq(t *testing.T) {
 
 func TestNewPagenoteNormal(t *testing.T) {
 	var w *httptest.ResponseRecorder
-	reqPn := &hlcmsg.Pagenote{
-		Uid:    1,
-		Pageid: 1,
-		Url:    "http://example.com",
-		Highlights: []*hlcmsg.RangeMeta{
-			&hlcmsg.RangeMeta{
-				Anchor:      "/",
-				Start:       "/1",
-				StartOffset: 0,
-				End:         "/2",
-				EndOffset:   3,
-			},
-		},
-	}
+	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
 	buf, _ := proto.Marshal(reqPn)
 	reader := bytes.NewReader(buf)
 	post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
@@ -69,7 +56,6 @@ func TestNewPagenoteNormal(t *testing.T) {
 		return
 	}
 	var err error
-	//respBody := w.Body.Bytes()
 	util.Log("encoded resp body:", w.Body.String())
 	decoder := base64.NewDecoder(base64.StdEncoding, w.Body)
 	respBody, err := ioutil.ReadAll(decoder)
@@ -84,33 +70,39 @@ func TestNewPagenoteNormal(t *testing.T) {
 	if err != nil {
 		t.Error("cannot parse response body")
 		t.Fail()
+		return
 	}
 	if pnResp.Code != hlcmsg.HlcResp_SUC {
 		t.Error("valid new pn request failed", pnResp.Msg)
 		t.Fail()
+		return
 	}
 	if pnResp.IdList == nil || len(pnResp.IdList.Arr) != 1 {
 		t.Error("Failed to get ", 1, "created id")
 		t.Fail()
+		return
 	}
 	if pnResp.IdList.Arr[0] < 1 {
 		t.Error("ID of created RangeMeta should be > 0")
 		t.Fail()
+		return
 	}
 }
 
 func TestGetPageNote(t *testing.T) {
-	req := httptest.NewRequest("GET", "/pagenote?uid=1", nil)
+	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
 	recorder := httptest.NewRecorder()
 	getPagenote(recorder, req)
 	httpResp := recorder.Result()
 	if httpResp.StatusCode != http.StatusOK {
-		t.Error("response code should be ", http.StatusOK, "got", httpResp.StatusCode, httpResp.Status)
+		t.Error("response code should be ", http.StatusOK, "got", httpResp.StatusCode, recorder.Body.String())
 		t.Fail()
+		return
 	}
 	if recorder.Body == nil {
 		t.Error("response body shouldn't be nil ")
 		t.Fail()
+		return
 	}
 	b64buf, err := ioutil.ReadAll(httpResp.Body)
 	if err != nil {
@@ -121,6 +113,7 @@ func TestGetPageNote(t *testing.T) {
 	if len(b64buf) < 1 {
 		t.Error("response body buf shouldn't be empty ")
 		t.Fail()
+		return
 	}
 	buf, err := ioutil.ReadAll(
 		base64.NewDecoder(
@@ -128,16 +121,19 @@ func TestGetPageNote(t *testing.T) {
 	if err != nil {
 		t.Error("response body should be base 64 encoded", err)
 		t.Fail()
+		return
 	}
 	resp := &hlcmsg.HlcResp{}
 	proto.Unmarshal(buf, resp)
 	if resp.Code != hlcmsg.HlcResp_SUC {
 		t.Error("response code should be ", hlcmsg.HlcResp_SUC, "got", resp.Code)
 		t.Fail()
+		return
 	}
 	if len(resp.PagenoteList) < 1 || len(resp.PagenoteList[0].Highlights) < 1 {
 		t.Error("parsed response page list should contain 1 range meta")
 		t.Fail()
+		return
 	}
 }
 

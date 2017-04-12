@@ -116,6 +116,18 @@ func (s *SqliteStorage) QueryPageId(url string) uint32 {
 	return id
 }
 
+func (s *SqliteStorage) QueryPage(pid uint32) (string, error) {
+	var url string
+	err := util.QueryDb(s.DB,
+		"select url from hlc_page where id=?",
+		[]interface{}{pid},
+		func(idx int, rows *sql.Rows) error {
+			return rows.Scan(&url)
+		})
+	return url, err
+
+}
+
 func (s *SqliteStorage) NewPage(title, url string) (id uint32) {
 	rst, err := s.DB.Exec(
 		"insert into hlc_page (title, url) values (?, ?)",

@@ -112,7 +112,7 @@ func TestDeleteRangeMeta(t *testing.T) {
 
 func TestQueryPageId(t *testing.T) {
 	ResetTestDb()
-	pid := storage.QueryPageId("example.com")
+	pid := storage.QueryPageId("http://example.com")
 	if pid != 1 {
 		t.Error("Should get 1 for page id, but got", pid)
 		t.Fail()

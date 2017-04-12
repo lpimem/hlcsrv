@@ -5,12 +5,17 @@ import "github.com/lpimem/hlcsrv/hlcmsg"
 import "github.com/lpimem/hlcsrv/storage"
 
 func TestNewNotes(t *testing.T) {
-	// newNotes(pn *hlcmsg.Pagenote) *hlcmsg.IdList
-	pn := mockPageNote()
-	idlist := newNotes(pn)
+	pn := mockPageNote(1, 2, "http://example.com/index.html")
+	idlist, err := newNotes(pn)
+	if err != nil {
+		t.Error("error: ", err)
+		t.Fail()
+		return
+	}
 	if idlist == nil {
 		t.Error("should received a valid idlist")
 		t.Fail()
+		return
 	}
 	if len(idlist.Arr) != 1 {
 		t.Error("idlist should contain 1 id")
@@ -88,19 +93,24 @@ func TestCleanUrl(t *testing.T) {
 	for _, tc := range tcs {
 		u := tc[0]
 		ex := tc[1]
-		got := cleanUrl(u)
+		got, err := cleanUrl(u)
+		if err != nil {
+			t.Error("error should'nt happen", err)
+			t.Fail()
+			continue
+		}
 		if got != ex {
-			t.Error("url not cleaned:", got)
+			t.Error("url should be properly cleaned. expect: ", ex, "| got:", got)
 			t.Fail()
 		}
 	}
 }
 
-func mockPageNote() *hlcmsg.Pagenote {
+func mockPageNote(uid uint32, pid uint32, url string) *hlcmsg.Pagenote {
 	return &hlcmsg.Pagenote{
-		Uid:    1,
-		Pageid: 1,
-		Url:    "http://example.com",
+		Uid:    uid,
+		Pageid: pid,
+		Url:    url,
 		Highlights: []*hlcmsg.RangeMeta{
 			&hlcmsg.RangeMeta{
 				Anchor:      "/",

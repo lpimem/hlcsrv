@@ -46,3 +46,19 @@ create table if not exists `hlc_comments`(
   `range` integer primary key,
   `comment`  TEXT
 );
+
+
+/**
+ * Apr 11, 2017
+ */
+
+create table if not exists `hlc_google_auth`(
+  `google_id` varchar primary key,
+  `uid` integer,
+  `last_access` timestamp default current_timestamp,
+  `ctime` timestamp default current_timestamp
+);
+
+create unique index if not exists `idx_google_auth_uid` on `hlc_google_auth` (`uid`);
+
+-- alter table `hlc_user` add column `avatar` varchar(256);

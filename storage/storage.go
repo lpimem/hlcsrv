@@ -69,6 +69,10 @@ func QueryPageId(url string) uint32 {
 	return id
 }
 
+func QueryPage(pid uint32) (string, error) {
+	return storage.QueryPage(pid)
+}
+
 func SavePagenote(pn *hlcmsg.Pagenote) []error {
 	// storage.SavePagenote()
 	errs := []error{}

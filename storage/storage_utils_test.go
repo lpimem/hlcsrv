@@ -30,7 +30,7 @@ func seedTestDb() error {
 		values (1, "Bob", "bob@example.com", "unsafe", "unsafe");
 
 	insert into hlc_page(id, title, url)
-		values (1, "example", "example.com");
+		values (1, "example", "http://example.com");
 
 	insert into hlc_range(id, anchor, start, startOffset, end, endOffset, text, page, author)
 		values (1, "#c", "#c/1", 0, "#c/12", 32, "This is the selected text", 1, 1);
