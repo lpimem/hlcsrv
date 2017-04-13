@@ -19,7 +19,7 @@ func cleanDb() error {
 	delete from hlc_range;
 	delete from hlc_user;
 	delete from hlc_page;
-	delete from hlc_comments;
+	delete from hlc_comment;
 	delete from hlc_google_auth;
 	`)
 	return err

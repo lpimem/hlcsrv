@@ -1,4 +1,4 @@
-package service
+package controller
 
 import "net/http"
 import (
@@ -10,12 +10,12 @@ import (
 	"github.com/lpimem/hlcsrv/util"
 )
 
-func index(w http.ResponseWriter, req *http.Request) {
+func Index(w http.ResponseWriter, req *http.Request) {
 	w.Write(bytes.NewBufferString("sorry, ").Bytes())
 	http.NotFound(w, req)
 }
 
-func getPagenote(w http.ResponseWriter, req *http.Request) {
+func GetPagenote(w http.ResponseWriter, req *http.Request) {
 	pn, err := parseGetNotesRequest(req)
 	if err != nil {
 		util.Log("Cannot parse request, error:", err)
@@ -32,7 +32,7 @@ func getPagenote(w http.ResponseWriter, req *http.Request) {
 	writeRespMessage(w, pn, nil)
 }
 
-func savePagenote(w http.ResponseWriter, req *http.Request) {
+func SavePagenote(w http.ResponseWriter, req *http.Request) {
 	if !RequirePost(w, req) {
 		return
 	}
@@ -55,7 +55,7 @@ func savePagenote(w http.ResponseWriter, req *http.Request) {
 	writeRespMessage(w, nil, idList)
 }
 
-func deletePagenote(w http.ResponseWriter, req *http.Request) {
+func DeletePagenote(w http.ResponseWriter, req *http.Request) {
 	if !RequirePost(w, req) {
 		return
 	}

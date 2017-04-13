@@ -1,4 +1,4 @@
-package service
+package controller
 
 import "testing"
 import "github.com/lpimem/hlcsrv/hlcmsg"

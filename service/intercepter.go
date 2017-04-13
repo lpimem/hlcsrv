@@ -35,12 +35,3 @@ func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) bool {
 	return true
 }
 
-func buildDefaultInterceptors() {
-	buildDefaultCookieChecker()
-}
-
-func buildDefaultCookieChecker() {
-	//var builder ReqCookieCheckerBuilder
-	//builder.Require("uid")
-	//AddRequestInterceptor(builder.Build())
-}

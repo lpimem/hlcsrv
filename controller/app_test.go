@@ -1,4 +1,4 @@
-package service
+package controller
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ func TestNewPagenotePostOnly(t *testing.T) {
 	var w *httptest.ResponseRecorder
 	get := httptest.NewRequest("GET", URL_NEW_PAGENOTE, nil)
 	w = httptest.NewRecorder()
-	savePagenote(w, get)
+	SavePagenote(w, get)
 	if w.Code != http.StatusBadRequest {
 		t.Error("Expecting", http.StatusBadRequest, "got", w.Code, w.Body.String())
 		t.Fail()
@@ -35,7 +35,7 @@ func TestNewPagenoteNoEmptyReq(t *testing.T) {
 	var post *http.Request
 	post = httptest.NewRequest("POST", URL_NEW_PAGENOTE, nil)
 	w = httptest.NewRecorder()
-	savePagenote(w, post)
+	SavePagenote(w, post)
 	if w.Code == http.StatusOK {
 		t.Error("null request body shouldn't get accepted")
 		t.Fail()
@@ -49,7 +49,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 	reader := bytes.NewReader(buf)
 	post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
 	w = httptest.NewRecorder()
-	savePagenote(w, post)
+	SavePagenote(w, post)
 	if w.Code != http.StatusOK {
 		t.Error("valid new pn request failed", w.Body.String())
 		t.Fail()
@@ -92,7 +92,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 func TestGetPageNote(t *testing.T) {
 	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
 	recorder := httptest.NewRecorder()
-	getPagenote(recorder, req)
+	GetPagenote(recorder, req)
 	httpResp := recorder.Result()
 	if httpResp.StatusCode != http.StatusOK {
 		t.Error("response code should be ", http.StatusOK, "got", httpResp.StatusCode, recorder.Body.String())
