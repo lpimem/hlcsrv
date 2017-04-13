@@ -32,8 +32,8 @@ for d in */ ; do
   do
     if [[ $msg != *"can't load package"* ]]; then
         color=$GREY
-        if [[ $msg == "---"* ]]; then
-          if [[ $msg != "--- PASS"* ]]; then 
+        if [[ $msg == *"---"* ]]; then
+          if [[ $msg != *"--- PASS"* ]]; then
             color=$RED
           else 
             color="${RESET}$GREY$GREEN"
@@ -43,7 +43,7 @@ for d in */ ; do
           color=$YELLOW
         elif [[ $msg == "ok"* ]]; then
           color="${RESET}$GREEN"
-        elif [[ $msg == "FAIL"* || $msg == *"should"* ]]; then
+        elif [[ $msg == *"FAIL"* || $msg == *"should"* ]]; then
           color=$RED
           suc=1
         fi

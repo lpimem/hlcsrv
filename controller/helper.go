@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
+	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/util"
 )
 
@@ -95,10 +96,19 @@ func writeRespMessage(w http.ResponseWriter, pn *hlcmsg.Pagenote, idlist *hlcmsg
 	return true
 }
 
-func RequirePost(w http.ResponseWriter, r *http.Request) bool {
+func requirePost(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method == http.MethodPost {
 		return true
 	}
 	http.Error(w, "only post accepted", http.StatusBadRequest)
 	return false
+}
+
+func requireAuth(w http.ResponseWriter, r *http.Request) bool {
+	var authorized = true
+	if !session.IsAuthenticated(r) {
+		http.Error(w, "not authenticated", http.StatusUnauthorized)
+		authorized = false
+	}
+	return authorized
 }

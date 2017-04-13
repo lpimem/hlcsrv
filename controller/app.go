@@ -2,20 +2,46 @@ package controller
 
 import "net/http"
 import (
-	"bytes"
-
 	"fmt"
+
+	"encoding/json"
 
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/util"
 )
 
 func Index(w http.ResponseWriter, req *http.Request) {
-	w.Write(bytes.NewBufferString("sorry, ").Bytes())
 	http.NotFound(w, req)
 }
 
+func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
+	if !requirePost(w, req) {
+		return
+	}
+	var (
+		rawToken    string
+		err         error
+		sessionInfo *SessionInfo
+	)
+	rawToken = req.FormValue("google_token")
+	if sessionInfo, err = doAuthenticateGoogleUser(req.Context(), rawToken); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+	}
+	payload, err := json.Marshal(sessionInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	_, err = w.Write(payload)
+	if err != nil {
+		util.Log(err)
+	}
+}
+
 func GetPagenote(w http.ResponseWriter, req *http.Request) {
+	if !requireAuth(w, req) {
+		return
+	}
 	pn, err := parseGetNotesRequest(req)
 	if err != nil {
 		util.Log("Cannot parse request, error:", err)
@@ -33,7 +59,10 @@ func GetPagenote(w http.ResponseWriter, req *http.Request) {
 }
 
 func SavePagenote(w http.ResponseWriter, req *http.Request) {
-	if !RequirePost(w, req) {
+	if !requirePost(w, req) {
+		return
+	}
+	if !requireAuth(w, req) {
 		return
 	}
 	pn, err := parseNewNotesRequest(req)
@@ -56,7 +85,10 @@ func SavePagenote(w http.ResponseWriter, req *http.Request) {
 }
 
 func DeletePagenote(w http.ResponseWriter, req *http.Request) {
-	if !RequirePost(w, req) {
+	if !requirePost(w, req) {
+		return
+	}
+	if !requireAuth(w, req) {
 		return
 	}
 	idList := parseRemoveNotesRequest(req)

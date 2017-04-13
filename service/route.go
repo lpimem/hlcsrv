@@ -36,7 +36,7 @@ func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 			ctx := r.Context()
 			ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
 			defer cancel()
-			r.WithContext(ctx)
+			r = r.WithContext(ctx)
 			if !PreprocessRequest(w, r) {
 				return
 			}

@@ -11,14 +11,12 @@ func (builder *ReqCookieCheckerBuilder) Require(key string) {
 }
 
 func (builder ReqCookieCheckerBuilder) Build() RequestInterceptor {
-	return func(req *http.Request) error {
+	return func(req *http.Request) (*http.Request, error) {
 		for _, expect := range builder.headers {
 			if _, err := req.Cookie(expect); err != nil {
-				return err
+				return req, err
 			}
 		}
-		return nil
+		return req, nil
 	}
 }
-
-

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
+	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/storage"
 	"github.com/lpimem/hlcsrv/util"
 )
@@ -20,6 +22,7 @@ func TestNewPagenotePostOnly(t *testing.T) {
 	// post only
 	var w *httptest.ResponseRecorder
 	get := httptest.NewRequest("GET", URL_NEW_PAGENOTE, nil)
+	get = fakeAuthenticateion(get)
 	w = httptest.NewRecorder()
 	SavePagenote(w, get)
 	if w.Code != http.StatusBadRequest {
@@ -34,6 +37,7 @@ func TestNewPagenoteNoEmptyReq(t *testing.T) {
 	// post empty
 	var post *http.Request
 	post = httptest.NewRequest("POST", URL_NEW_PAGENOTE, nil)
+	post = fakeAuthenticateion(post)
 	w = httptest.NewRecorder()
 	SavePagenote(w, post)
 	if w.Code == http.StatusOK {
@@ -48,6 +52,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 	buf, _ := proto.Marshal(reqPn)
 	reader := bytes.NewReader(buf)
 	post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+	post = fakeAuthenticateion(post)
 	w = httptest.NewRecorder()
 	SavePagenote(w, post)
 	if w.Code != http.StatusOK {
@@ -91,6 +96,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 
 func TestGetPageNote(t *testing.T) {
 	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
+	req = fakeAuthenticateion(req)
 	recorder := httptest.NewRecorder()
 	GetPagenote(recorder, req)
 	httpResp := recorder.Result()
@@ -135,6 +141,23 @@ func TestGetPageNote(t *testing.T) {
 		t.Fail()
 		return
 	}
+}
+
+func TestFakeAuthentication(t *testing.T) {
+	r := httptest.NewRequest("GET", "/", nil)
+	r = fakeAuthenticateion(r)
+	if !session.IsAuthenticated(r) {
+		t.Error("fakeAuthenticateion should mark request authenticated.")
+		t.Fail()
+	}
+}
+
+func fakeAuthenticateion(r *http.Request) *http.Request {
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, session.AUTHENTICATED, true)
+	ctx = context.WithValue(ctx, session.USER_ID, 10)
+	ctx = context.WithValue(ctx, session.SESSION_ID, "fake_session_id")
+	return r.WithContext(ctx)
 }
 
 func init() {

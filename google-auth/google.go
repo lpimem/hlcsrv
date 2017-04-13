@@ -4,7 +4,10 @@ import (
 	"log"
 	"os"
 
+	"errors"
+
 	oidc "github.com/coreos/go-oidc"
+	"github.com/lpimem/hlcsrv/conf"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
@@ -18,13 +21,26 @@ var (
 
 const redirectURL = "http://127.0.0.1:5556/auth/google/callback"
 
-func verifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToken, error) {
+func VerifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToken, error) {
 	idToken, err := verifier.Verify(ctx, rawToken)
 	if err != nil {
-		log.Println("WARN: Cannot verify token", err)
+		log.Println("WARN: Cannot verify token: ", err)
+		return nil, err
+	}
+	if err := verifyAud(ctx, idToken); err != nil {
+		log.Println("WARN: Cannot verify token: ", err)
 		return nil, err
 	}
 	return idToken, nil
+}
+
+func verifyAud(ctx context.Context, idToken *oidc.IDToken) error {
+	for _, aud := range idToken.Audience {
+		if aud == conf.GoogleSignInAppId() {
+			return nil
+		}
+	}
+	return errors.New("audience dismatch")
 }
 
 func configure(ctx context.Context) error {

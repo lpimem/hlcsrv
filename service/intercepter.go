@@ -7,7 +7,7 @@ import "net/http"
  * It can prevent the request from being further processed by returning
  * an error
  */
-type RequestInterceptor func(req *http.Request) error
+type RequestInterceptor func(req *http.Request) (*http.Request, error)
 
 var interceptors []RequestInterceptor
 
@@ -25,8 +25,9 @@ func AddRequestInterceptor(handler RequestInterceptor) {
  * When the return value is false, the respWriter will be modifed with the error status
  */
 func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) bool {
+	var err error
 	for _, handle := range interceptors {
-		err := handle(req)
+		req, err = handle(req)
 		if err != nil {
 			http.Error(respWriter, err.Error(), http.StatusBadRequest)
 			return false
@@ -34,4 +35,3 @@ func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) bool {
 	}
 	return true
 }
-
