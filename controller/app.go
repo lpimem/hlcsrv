@@ -69,6 +69,7 @@ func GetPagenote(w http.ResponseWriter, req *http.Request) {
 }
 
 func SavePagenote(w http.ResponseWriter, req *http.Request) {
+	util.Log("SavePagenote...")
 	if !requirePost(w, req) {
 		return
 	}
@@ -95,6 +96,7 @@ func SavePagenote(w http.ResponseWriter, req *http.Request) {
 }
 
 func DeletePagenote(w http.ResponseWriter, req *http.Request) {
+	util.Log("DeletePagenote...")
 	if !requirePost(w, req) {
 		return
 	}

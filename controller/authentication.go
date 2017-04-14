@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/coreos/go-oidc"
@@ -11,6 +10,7 @@ import (
 	"github.com/lpimem/hlcsrv/security"
 	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/storage"
+	"github.com/lpimem/hlcsrv/util"
 )
 
 type SessionInfo struct {
@@ -59,7 +59,7 @@ func updateGoogleUserSession(
 	)
 	uid, err = storage.GetOrCreateUidForGoogleUser(gid, email)
 	if err != nil {
-		log.Println(err)
+		util.Log(err)
 		return nil, err
 	}
 	sInfo, err := storage.QuerySessionByUid(uid)

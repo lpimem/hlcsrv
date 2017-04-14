@@ -18,7 +18,7 @@ const (
 var _level = _DEBUG
 
 func _log(lv int, v ...interface{}) {
-	if _level >= lv {
+	if lv >= _level {
 		if lv >= _WARN {
 			_logger.Panic(v...)
 		} else {
@@ -46,7 +46,7 @@ func Error(v ...interface{}) {
 func init() {
 	_logger = log.New(os.Stdout, "hlcsrv: ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	log.SetOutput(os.Stdout)
-	log.SetPrefix("hlcsrv: ")
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	// log.SetOutput(os.Stdout)
+	// log.SetPrefix("hlcsrv: ")
+	// log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }

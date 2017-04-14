@@ -14,7 +14,7 @@ func validToken() string {
 //		t.Error("token should be valid", err)
 //		t.Fail()
 //	} else {
-//		log.Println(id.Audience, id.Subject, id.Expiry, id.Issuer, id.IssuedAt)
+//		util.Log(id.Audience, id.Subject, id.Expiry, id.Issuer, id.IssuedAt)
 //	}
 //}
 
