@@ -25,10 +25,12 @@ func VerifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToke
 	idToken, err := verifier.Verify(ctx, rawToken)
 	if err != nil {
 		log.Println("WARN: Cannot verify token: ", err)
+		log.Println(rawToken)
 		return nil, err
 	}
 	if err := verifyAud(ctx, idToken); err != nil {
 		log.Println("WARN: Cannot verify token: ", err)
+		log.Println(rawToken)
 		return nil, err
 	}
 	return idToken, nil
@@ -65,5 +67,7 @@ func configure(ctx context.Context) error {
 }
 
 func init() {
+	log.Println("google client id:", clientID)
+	log.Println("google client secret:", clientSecret[:4])
 	configure(context.Background())
 }

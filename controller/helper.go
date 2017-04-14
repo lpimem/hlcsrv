@@ -100,7 +100,7 @@ func requirePost(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method == http.MethodPost {
 		return true
 	}
-	http.Error(w, "only post accepted", http.StatusBadRequest)
+	http.Error(w, "bad request", http.StatusBadRequest)
 	return false
 }
 

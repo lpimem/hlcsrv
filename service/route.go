@@ -20,6 +20,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/pagenote/delete", controller.DeletePagenote)
 	mux.HandleFunc("/pagenote/new", controller.SavePagenote)
 	mux.HandleFunc("/pagenote", controller.GetPagenote)
+	mux.HandleFunc("/google_auth", controller.AuthenticateGoogleUser)
 	fs := http.FileServer(
 		http.Dir("static"))
 	// http.Dir(util.GetAbsRunDirPath() + "static"))

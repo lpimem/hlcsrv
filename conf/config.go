@@ -1,5 +1,7 @@
 package conf
 
+import "os"
+
 func IsDebug() bool {
 	return true
 }
@@ -12,11 +14,13 @@ func SessionSecret() string {
 	return "8M3W5A0CGYFx_bzjMzAFqLZ8esI3F0_CveBbgDZLd0hc2ManB3il2Cw9IPcY7Fr1"
 }
 
-/**SessionKeyPage is the random seed for key name for Page Id.
- */
-func SessionKeyPage() string {
-	return "PkNMgRN4kx_uxrmduaVK1AyL8L7aCxhVDHmSPWHpp9v6UD-BJGEMPMbRPQaa9Dc1"
-}
+// Page should be a request parameter, not a cookie
+//
+///**SessionKeyPage is the random seed for key name for Page Id.
+// */
+//func SessionKeyPage() string {
+//	return "PkNMgRN4kx_uxrmduaVK1AyL8L7aCxhVDHmSPWHpp9v6UD-BJGEMPMbRPQaa9Dc1"
+//}
 
 /**SessionKeyUser is the random seed for key name for User Id.
  */
@@ -37,5 +41,5 @@ func SessionValidHours() float64 {
 }
 
 func GoogleSignInAppId() string {
-	return ""
+	return os.Getenv("GOOGLE_OAUTH2_CLIENT_ID")
 }

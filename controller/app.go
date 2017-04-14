@@ -4,9 +4,12 @@ import "net/http"
 import (
 	"fmt"
 
-	"encoding/json"
+	"strconv"
+
+	"io/ioutil"
 
 	"github.com/lpimem/hlcsrv/conf"
+	"github.com/lpimem/hlcsrv/hlccookie"
 	"github.com/lpimem/hlcsrv/util"
 )
 
@@ -23,16 +26,18 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 		err         error
 		sessionInfo *SessionInfo
 	)
-	rawToken = req.FormValue("google_token")
+	reqBody, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	rawToken = string(reqBody)
 	if sessionInfo, err = doAuthenticateGoogleUser(req.Context(), rawToken); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
-	}
-	payload, err := json.Marshal(sessionInfo)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
-	_, err = w.Write(payload)
+
+	hlccookie.SetAuthCookies(w, sessionInfo.Sid, sessionInfo.Uid)
+	_, err = w.Write([]byte(strconv.FormatUint(uint64(sessionInfo.Uid), 10)))
 	if err != nil {
 		util.Log(err)
 	}

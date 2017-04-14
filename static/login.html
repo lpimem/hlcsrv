@@ -1,28 +1,69 @@
 <html lang="en">
 <head>
     <title>Login</title>
-    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-scope" content="email">
     <meta name="google-signin-client_id" content="900696138865-vdsgcariehvat8nkluvltoq79n0rhqr9.apps.googleusercontent.com">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
 
 <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"></div>
-<script>
-    function onSignIn(googleUser) {
-        // Useful data for your client-side scripts:
-        var profile = googleUser.getBasicProfile();
-        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
-        console.log('Full Name: ' + profile.getName());
-        console.log('Given Name: ' + profile.getGivenName());
-        console.log('Family Name: ' + profile.getFamilyName());
-        console.log("Image URL: " + profile.getImageUrl());
-        console.log("Email: " + profile.getEmail());
+<div id='hlc-log' class="hlc-log">
 
+</div>
+<script>
+    $ = document.getElementById.bind(document);
+
+    var HLC_UID = null;
+
+
+    function request(method, url, payload, onSuccess, onFail){
+        let r = new XMLHttpRequest();
+        r.open(method, url, true);
+        function onreadystatechange(){
+            if (r.readyState === XMLHttpRequest.DONE){
+                if (r.status >= 200 && r.status <300 || r.status === 304){
+                    onSuccess(r.response);
+                } else {
+                    onFail(r.status, r.statusText)
+                }
+            }
+        }
+        r.onreadystatechange = onreadystatechange;
+        r.send(payload);
+    }
+
+    function onHLCAuthResponse(resp){
+        try{
+            HLC_UID = parseInt(resp);
+            log("LOG IN SUCCESS");
+        } catch( e ){
+            console.error(e);
+            log("ERROR: " + e.toString());
+        }
+    }
+
+    function onHLCAuthRespError(code, msg){
+        console.error(code, msg);
+        log("ERROR: " + msg);
+    }
+
+    function doHLCAuth(id_token){
+        request("POST", "/google_auth", id_token, onHLCAuthResponse, onHLCAuthRespError)
+    }
+
+    function onSignIn(googleUser) {
         // The ID token you need to pass to your backend:
         var id_token = googleUser.getAuthResponse().id_token;
         console.log("ID Token: " + id_token);
-    };
+        doHLCAuth(id_token);
+    }
+
+    function log(text){
+        let log = $("hlc-log");
+        log.innerText += "\r\n";
+        log.innerText += text;
+    }
 </script>
-</body>d
+</body>
 </html>
