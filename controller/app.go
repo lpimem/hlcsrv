@@ -2,10 +2,8 @@ package controller
 
 import "net/http"
 import (
+	"encoding/json"
 	"fmt"
-
-	"strconv"
-
 	"io/ioutil"
 
 	"github.com/lpimem/hlcsrv/conf"
@@ -37,14 +35,21 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	hlccookie.SetAuthCookies(w, sessionInfo.Sid, sessionInfo.Uid)
-	_, err = w.Write([]byte(strconv.FormatUint(uint64(sessionInfo.Uid), 10)))
+	respJson, err := json.Marshal(sessionInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	_, err = w.Write(respJson)
 	if err != nil {
 		util.Log(err)
 	}
 }
 
 func GetPagenote(w http.ResponseWriter, req *http.Request) {
+	util.Log("GetPagenote...")
 	if !requireAuth(w, req) {
+		util.Log("Not authorized...")
 		return
 	}
 	pn, err := parseGetNotesRequest(req)

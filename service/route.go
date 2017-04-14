@@ -3,9 +3,6 @@ package service
 import (
 	"net/http"
 
-	"context"
-	"time"
-
 	"github.com/lpimem/hlcsrv/controller"
 	"github.com/lpimem/hlcsrv/util"
 )
@@ -34,10 +31,10 @@ func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 	wrapper.HandleFunc("/",
 		func(w http.ResponseWriter, r *http.Request) {
 			util.Debug(r.Method, "\t", r.URL.String())
-			ctx := r.Context()
-			ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
-			defer cancel()
-			r = r.WithContext(ctx)
+			//ctx := r.Context()
+			//ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
+			//defer cancel()
+			//r = r.WithContext(ctx)
 			if !PreprocessRequest(w, r) {
 				return
 			}
@@ -48,4 +45,5 @@ func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 
 func init() {
 	buildDefaultInterceptors()
+	util.Debug(len(interceptors), "interceptors loaded.")
 }

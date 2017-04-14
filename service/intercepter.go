@@ -1,6 +1,10 @@
 package service
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/lpimem/hlcsrv/util"
+)
 
 /*RequestInterceptor preprocess a request before it is handled
  * by a listener.
@@ -9,7 +13,7 @@ import "net/http"
  */
 type RequestInterceptor func(req *http.Request) (*http.Request, error)
 
-var interceptors []RequestInterceptor
+var interceptors = []RequestInterceptor{}
 
 /*AddRequestInterceptor add a new request preprocessor (interceptor).
  * Interceptors are called before each request is handled by a listener.
@@ -27,11 +31,14 @@ func AddRequestInterceptor(handler RequestInterceptor) {
 func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) bool {
 	var err error
 	for _, handle := range interceptors {
+		util.Debug("applying preprocessor:", handle)
 		req, err = handle(req)
 		if err != nil {
+			util.Warn("error pre-processing", err)
 			http.Error(respWriter, err.Error(), http.StatusBadRequest)
 			return false
 		}
 	}
+	util.Debug("all pre-processors done.")
 	return true
 }

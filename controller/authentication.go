@@ -2,12 +2,9 @@ package controller
 
 import (
 	"context"
-
 	"errors"
-
-	"time"
-
 	"log"
+	"time"
 
 	"github.com/coreos/go-oidc"
 	"github.com/lpimem/hlcsrv/google-auth"
@@ -17,8 +14,8 @@ import (
 )
 
 type SessionInfo struct {
-	Uid uint32
-	Sid string
+	Uid uint32 `json:"uid"`
+	Sid string `json:"token"`
 }
 
 type GoogleTokenClaim struct {

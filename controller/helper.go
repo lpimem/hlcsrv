@@ -107,7 +107,14 @@ func requirePost(w http.ResponseWriter, r *http.Request) bool {
 func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 	var authorized = true
 	if !session.IsAuthenticated(r) {
-		http.Error(w, "not authenticated", http.StatusUnauthorized)
+		ctx := r.Context()
+		reason := ctx.Value(session.REASON)
+		var errMsg string = "not authenticated"
+		if reason != nil {
+			errMsg = errMsg + ": " + reason.(string)
+		}
+		util.Debug(errMsg)
+		http.Error(w, errMsg, http.StatusUnauthorized)
 		authorized = false
 	}
 	return authorized

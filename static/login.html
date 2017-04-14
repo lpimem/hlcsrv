@@ -12,9 +12,18 @@
 
 </div>
 <script>
+    if (!chrome && !chrome.runtime){
+        document.body.innerHTML = "only chrome browser is supported.";
+    }
+
+
+    let extensionId = "cdbkmcnjjgdmbgejfejpefefoaacobbg";
+
+
     $ = document.getElementById.bind(document);
 
     var HLC_UID = null;
+    var HLC_TOKEN = null;
 
 
     function request(method, url, payload, onSuccess, onFail){
@@ -33,14 +42,28 @@
         r.send(payload);
     }
 
+
     function onHLCAuthResponse(resp){
+        let suc = false;
         try{
-            HLC_UID = parseInt(resp);
-            log("LOG IN SUCCESS");
+            let respObj = JSON.parse(resp);
+            HLC_UID = parseInt(respObj.uid);
+            HLC_TOKEN = respObj.token;
+            suc = true;
+            log("LOG IN SUCCESS " + HLC_UID);
         } catch( e ){
             console.error(e);
             log("ERROR: " + e.toString());
         }
+        chrome.runtime.sendMessage(extensionId, {
+            login_success: suc,
+            hlc_uid: HLC_UID,
+            hlc_token: HLC_TOKEN
+        }, function(response){
+            if (suc){
+                window.close();
+            }
+        });
     }
 
     function onHLCAuthRespError(code, msg){

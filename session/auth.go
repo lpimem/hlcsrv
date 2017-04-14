@@ -2,10 +2,10 @@ package session
 
 import (
 	"context"
-	"net/http"
-	"time"
-
 	"errors"
+	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/hlccookie"
@@ -29,7 +29,6 @@ is authenticated.
 func Authenticate(req *http.Request) (*http.Request, error) {
 	var (
 		uid uint32
-		c   *http.Cookie
 		sid string
 		err error
 		ctx context.Context
@@ -37,19 +36,13 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 	ctx = req.Context()
 	ctx = context.WithValue(ctx, AUTHENTICATED, false)
 	req = req.WithContext(ctx)
-	if uid, err = hlccookie.GetRequestUID(req); err != nil {
-		util.Log("cannot extract uid from cookie", err)
-		ctx = context.WithValue(ctx, REASON, "COOKIE UID "+err.Error())
+	uid, sid, err = extractUidSid(req)
+	if err != nil {
+		util.Log("cannot extract uid/sid:", sid, uid, err)
+		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
 		return req, nil
 	}
-	if c, err = req.Cookie(conf.SessionKeySID()); err != nil {
-		util.Log("cannot extract sid from cookie", err)
-		ctx = context.WithValue(ctx, REASON, "COOKIE SID "+err.Error())
-		req = req.WithContext(ctx)
-		return req, nil
-	}
-	sid = c.Value
 	if err = VerifySession(sid, uid, nil); err != nil {
 		util.Log("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
@@ -60,7 +53,49 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 	ctx = context.WithValue(ctx, USER_ID, uid)
 	ctx = context.WithValue(ctx, SESSION_ID, sid)
 	req = req.WithContext(ctx)
+	util.Log("request from", uid, "is authorized.")
 	return req, nil
+}
+
+func extractUidSid(req *http.Request) (uid uint32, sid string, err error) {
+	uid, sid, err = extractUidSidFromCookies(req)
+	if err != nil {
+		var err2 error
+		uid, sid, err2 = extractUidSidFromRequestHeader(req)
+		if err2 != nil {
+			err = errors.New(err.Error() + " & " + err2.Error())
+			return
+		} else {
+			err = nil
+		}
+	}
+	return
+}
+
+func extractUidSidFromCookies(req *http.Request) (uid uint32, sid string, err error) {
+	var c *http.Cookie
+	if uid, err = hlccookie.GetRequestUID(req); err != nil {
+		return
+	}
+	if c, err = req.Cookie(conf.SessionKeySID()); err != nil {
+		return
+	}
+	sid = c.Value
+	return
+}
+
+func extractUidSidFromRequestHeader(req *http.Request) (uid uint32, sid string, err error) {
+	var uid64 uint64
+	uid64, err = strconv.ParseUint(req.Header.Get(HUSER_ID), 10, 32)
+	if err != nil {
+		return
+	}
+	uid = uint32(uid64)
+	sid = req.Header.Get(HSESSION_ID)
+	if sid == "" {
+		err = errors.New("missing session id header")
+	}
+	return
 }
 
 func IsSessionTimeout(lastAccess time.Time) bool {

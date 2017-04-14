@@ -7,11 +7,11 @@ import (
 
 	"net/http"
 
-	"strconv"
-
 	"fmt"
 
 	"time"
+
+	"strconv"
 
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/storage"
@@ -61,44 +61,77 @@ func TestAuthenticate(t *testing.T) {
 		&auth_case{"sid missing", "", uint32(10), false},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.Name, func(t *testing.T) {
-			var (
-				req *http.Request
-			)
-			req = httptest.NewRequest("GET", "/", nil)
-			if tc.Sid != "" {
-				req.AddCookie(&http.Cookie{
-					Name:  conf.SessionKeySID(),
-					Value: tc.Sid,
-				})
-				fmt.Println("req add cookie:", conf.SessionKeySID(), tc.Sid)
-				if _, err := req.Cookie(conf.SessionKeySID()); err != nil {
-					t.Error("cookie not set", err)
+	for _, byCookie := range []bool{true, false} {
+		for _, tc := range testCases {
+			var tcname string
+			if byCookie {
+				tcname = tc.Name + "[cookie]"
+			} else {
+				tcname = tc.Name + "[header]"
+			}
+			t.Run(tcname, func(t *testing.T) {
+				var (
+					req *http.Request
+					err error
+				)
+				req = httptest.NewRequest("GET", "/", nil)
+				if byCookie {
+					req, err = setByCookie(req, tc.Uid, tc.Sid)
+					if err != nil {
+						t.Error(err)
+						t.Fail()
+						return
+					}
+				} else {
+					req, err = setByHeader(req, tc.Uid, tc.Sid)
+				}
+				req, err = Authenticate(req)
+				if err != nil {
+					fmt.Println("Authenticate should return no error")
 					t.Fail()
 				}
-			}
-			if tc.Uid > 0 {
-				req.AddCookie(&http.Cookie{
-					Name:  conf.SessionKeyUser(),
-					Value: strconv.FormatUint(uint64(tc.Uid), 10),
-				})
-				fmt.Println("req add cookie:", conf.SessionKeyUser(), tc.Uid)
-			}
-			req, err := Authenticate(req)
-			if err != nil {
-				fmt.Println("Authenticate should return no error")
-				t.Fail()
-			}
-			if IsAuthenticated(req) != tc.Suc {
-				fmt.Println(req.Context().Value(AUTHENTICATED))
-				fmt.Println(req.Context().Value(USER_ID))
-				fmt.Println(req.Context().Value(SESSION_ID))
-				fmt.Println(req.Context().Value(REASON))
-				t.Fail()
-			}
-		})
+				if IsAuthenticated(req) != tc.Suc {
+					fmt.Println(req.Context().Value(AUTHENTICATED))
+					fmt.Println(req.Context().Value(USER_ID))
+					fmt.Println(req.Context().Value(SESSION_ID))
+					fmt.Println(req.Context().Value(REASON))
+					t.Fail()
+				}
+			})
+		}
 	}
+
+}
+
+func setByCookie(req *http.Request, uid uint32, sid string) (*http.Request, error) {
+	if sid != "" {
+		req.AddCookie(&http.Cookie{
+			Name:  conf.SessionKeySID(),
+			Value: sid,
+		})
+		fmt.Println("req add cookie:", conf.SessionKeySID(), sid)
+		if _, err := req.Cookie(conf.SessionKeySID()); err != nil {
+			return nil, err
+		}
+	}
+	if uid > 0 {
+		req.AddCookie(&http.Cookie{
+			Name:  conf.SessionKeyUser(),
+			Value: strconv.FormatUint(uint64(uid), 10),
+		})
+		fmt.Println("req add cookie:", conf.SessionKeyUser(), uid)
+	}
+	return req, nil
+}
+
+func setByHeader(req *http.Request, uid uint32, sid string) (*http.Request, error) {
+	if uid > 0 {
+		req.Header.Set(HUSER_ID, strconv.FormatUint(uint64(uid), 10))
+	}
+	if sid != "" {
+		req.Header.Set(HSESSION_ID, sid)
+	}
+	return req, nil
 }
 
 func init() {
