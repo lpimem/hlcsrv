@@ -1,4 +1,4 @@
-package controller
+package auth
 
 import (
 	"context"
@@ -7,36 +7,15 @@ import (
 
 	"github.com/coreos/go-oidc"
 	"github.com/go-playground/log"
-	"github.com/lpimem/hlcsrv/google-auth"
-	"github.com/lpimem/hlcsrv/security"
-	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/storage"
 )
 
-type SessionInfo struct {
-	Uid uint32 `json:"uid"`
-	Sid string `json:"token"`
-}
-
-type GoogleTokenClaim struct {
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	Name          string `json:"name"`
-	Picture       string `json:"picture"`
-	Locale        string `json:"locale"`
-}
-
-func computeRandomSessionId(seed string) string {
-	once := security.RandStringBytesMaskImprSrc(32)
-	return security.HashWithSlt(once, seed)
-}
-
-func doAuthenticateGoogleUser(ctx context.Context, rawToken string) (*SessionInfo, error) {
+func AuthenticateGoogleUser(ctx context.Context, rawToken string) (*SessionInfo, error) {
 	var (
 		idToken *oidc.IDToken
 		err     error
 	)
-	idToken, err = google_auth.VerifyGoogleAuthIdToken(ctx, rawToken)
+	idToken, err = VerifyGoogleAuthIdToken(ctx, rawToken)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +56,7 @@ func updateGoogleUserSession(
 		// verify if existing session timed out
 		sid = sInfo.Sid
 		lastAccess = sInfo.LastAccess
-		if err = session.VerifySession(sid, uid, lastAccess); err != nil {
+		if err = VerifySession(sid, uid, lastAccess); err != nil {
 			return nil, err
 		}
 		// refresh session.

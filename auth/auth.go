@@ -1,29 +1,19 @@
-package session
+package auth
 
 import (
 	"context"
 	"errors"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
-	"github.com/lpimem/hlcsrv/hlccookie"
 	"github.com/lpimem/hlcsrv/storage"
 )
 
-type context_key int
-
-const (
-	AUTHENTICATED context_key = 1
-	USER_ID       context_key = 2
-	SESSION_ID    context_key = 3
-	REASON        context_key = 4
-)
-
-/** Authenticate always returns nil.
-It add a flag to the request context to indicate if the request
+/** Authenticate always returns nil. It implements the interceptor
+interface.
+Authenticate add a flag to the request context to indicate if the request
 is authenticated.
 */
 func Authenticate(req *http.Request) (*http.Request, error) {
@@ -57,51 +47,14 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 	return req, nil
 }
 
-func extractUidSid(req *http.Request) (uid uint32, sid string, err error) {
-	uid, sid, err = extractUidSidFromCookies(req)
-	if err != nil {
-		var err2 error
-		uid, sid, err2 = extractUidSidFromRequestHeader(req)
-		if err2 != nil {
-			err = errors.New(err.Error() + " & " + err2.Error())
-			return
-		} else {
-			err = nil
-		}
-	}
-	return
-}
-
-func extractUidSidFromCookies(req *http.Request) (uid uint32, sid string, err error) {
-	var c *http.Cookie
-	if uid, err = hlccookie.GetRequestUID(req); err != nil {
-		return
-	}
-	if c, err = req.Cookie(conf.SessionKeySID()); err != nil {
-		return
-	}
-	sid = c.Value
-	return
-}
-
-func extractUidSidFromRequestHeader(req *http.Request) (uid uint32, sid string, err error) {
-	var uid64 uint64
-	uid64, err = strconv.ParseUint(req.Header.Get(HUSER_ID), 10, 32)
-	if err != nil {
-		return
-	}
-	uid = uint32(uid64)
-	sid = req.Header.Get(HSESSION_ID)
-	if sid == "" {
-		err = errors.New("missing session id header")
-	}
-	return
-}
-
+// return if duration since lastAccess exceeds the max session lifetime
+// Max session lifetime is defined by func conf.SessionValidHours()
 func IsSessionTimeout(lastAccess time.Time) bool {
 	return time.Since(lastAccess).Hours() >= conf.SessionValidHours()
 }
 
+// verify a session with claimed session id sid for user id uid, previously accessed
+// at lastAccess is still valid.
 func VerifySession(sid string, uid uint32, lastAccess *time.Time) error {
 	var (
 		err error
@@ -123,6 +76,9 @@ func VerifySession(sid string, uid uint32, lastAccess *time.Time) error {
 	return nil
 }
 
+// Verify if a http request r is already validated
+// this function should be called in the begining of each
+// request handler which checks authentication.
 func IsAuthenticated(r *http.Request) bool {
 	ctx := r.Context()
 	v := ctx.Value(AUTHENTICATED)

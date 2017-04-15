@@ -1,4 +1,4 @@
-package google_auth
+package auth
 
 import (
 	"os"
@@ -9,19 +9,31 @@ import (
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
+	//"golang.org/x/oauth2"
 )
 
 var (
 	clientID     = os.Getenv("GOOGLE_OAUTH2_CLIENT_ID")
 	clientSecret = os.Getenv("GOOGLE_OAUTH2_CLIENT_SECRET")
 	verifier     *oidc.IDTokenVerifier
-	config       oauth2.Config
+	//config       oauth2.Config
 )
 
-const redirectURL = "http://127.0.0.1:5556/auth/google/callback"
+// GoogleTokenClaim represents fields extracted from an IDToken
+type GoogleTokenClaim struct {
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Name          string `json:"name"`
+	Picture       string `json:"picture"`
+	Locale        string `json:"locale"`
+}
 
+/**VerifyGoogleAuthIdToken parse and validate the raw google sign-in token string.
+ */
 func VerifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToken, error) {
+	if err := ensureGoogleAppConfig(); err != nil {
+		panic(err)
+	}
 	idToken, err := verifier.Verify(ctx, rawToken)
 	if err != nil {
 		log.Warn("Cannot verify google token: ", err)
@@ -56,31 +68,29 @@ func configure(ctx context.Context) error {
 		SkipNonceCheck: true,
 	}
 	verifier = provider.Verifier(oidcConfig)
-	config = oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Endpoint:     provider.Endpoint(),
-		RedirectURL:  redirectURL,
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-	}
+	//config = oauth2.Config{
+	//	ClientID:     clientID,
+	//	ClientSecret: clientSecret,
+	//	Endpoint:     provider.Endpoint(),
+	//	RedirectURL:  conf.GoogleOAuthRedirectURL(),
+	//	Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+	//}
 	return nil
 }
 
 func ensureGoogleAppConfig() error {
 	if clientID == "" || clientSecret == "" {
 		msg := "Cannot Find Google App Config"
-		log.Error(msg)
+		log.Warn(msg)
 		return errors.New(msg)
 	}
 	return nil
 }
 
 func init() {
-	if err := ensureGoogleAppConfig(); err != nil {
-		panic(err)
-	}
+	_ = ensureGoogleAppConfig()
 	log.Info("google client id:", clientID)
-	log.Info("google client secret:", clientSecret[:4])
+	log.Info("google client secret:", len(clientSecret))
 	if err := configure(context.Background()); err != nil {
 		panic(err)
 	}

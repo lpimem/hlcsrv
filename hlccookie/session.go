@@ -8,6 +8,7 @@ import (
 	"github.com/lpimem/hlcsrv/conf"
 )
 
+// extract user id from request cookie
 func GetRequestUID(r *http.Request) (uint32, error) {
 	return getCookieAsUInt32(r, conf.SessionKeyUser())
 }
@@ -28,6 +29,7 @@ func getCookieAsUInt32(r *http.Request, key string) (uint32, error) {
 	return 0, err
 }
 
+// set authentication cookie for response.
 func SetAuthCookies(w http.ResponseWriter, sid string, uid uint32) {
 	http.SetCookie(w, &http.Cookie{Name: conf.SessionKeySID(), Value: sid})
 	http.SetCookie(w, &http.Cookie{Name: conf.SessionKeyUser(), Value: strconv.FormatUint(uint64(uid), 10)})

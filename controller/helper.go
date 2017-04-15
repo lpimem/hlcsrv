@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
+	"github.com/lpimem/hlcsrv/auth"
 	"github.com/lpimem/hlcsrv/hlcmsg"
-	"github.com/lpimem/hlcsrv/session"
 )
 
 func parseRemoveNotesRequest(r *http.Request) *hlcmsg.IdList {
@@ -102,9 +102,9 @@ func requirePost(w http.ResponseWriter, r *http.Request) bool {
 
 func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 	var authorized = true
-	if !session.IsAuthenticated(r) {
+	if !auth.IsAuthenticated(r) {
 		ctx := r.Context()
-		reason := ctx.Value(session.REASON)
+		reason := ctx.Value(auth.REASON)
 		var errMsg string = "not authenticated"
 		if reason != nil {
 			errMsg = errMsg + ": " + reason.(string)

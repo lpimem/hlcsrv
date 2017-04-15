@@ -2,13 +2,17 @@ package conf
 
 import "os"
 
+// should the app run in debugging mode.
 func IsDebug() bool {
 	return true
 }
 
 /**SessionSecret is the secret used to sign your cookies
  * TODO : Change the value before deployment.
- * secret is used to sign your cookies
+ * On Mac or Linux, you can use the following command to generate one:
+ *   ```
+ *   env LC_CTYPE=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | fold -w 64 | head -n 1
+ *   ```
  */
 func SessionSecret() string {
 	return "8M3W5A0CGYFx_bzjMzAFqLZ8esI3F0_CveBbgDZLd0hc2ManB3il2Cw9IPcY7Fr1"
@@ -40,6 +44,16 @@ func SessionValidHours() float64 {
 	return 24 * 3
 }
 
+/**GoogleSignInAppId extract google client id from $GOOGLE_OAUTH2_CLIENT_ID
+environment variable.
+*/
 func GoogleSignInAppId() string {
 	return os.Getenv("GOOGLE_OAUTH2_CLIENT_ID")
+}
+
+/** returns the OAuth2.0 redirect URL for 3-legged authentication.
+(Currently this is feature is not supported)
+*/
+func GoogleOAuthRedirectURL() string {
+	return "http://127.0.0.1:5556/auth/google/callback"
 }

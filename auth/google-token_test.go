@@ -1,4 +1,4 @@
-package google_auth
+package auth
 
 import "context"
 
@@ -20,7 +20,5 @@ func validToken() string {
 
 func init() {
 	// setup test client id and secret
-	if err := configure(context.Background()); err != nil {
-		panic(err)
-	}
+	configure(context.Background())
 }

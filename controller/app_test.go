@@ -11,8 +11,8 @@ import (
 
 	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
+	"github.com/lpimem/hlcsrv/auth"
 	"github.com/lpimem/hlcsrv/hlcmsg"
-	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/storage"
 )
 
@@ -146,7 +146,7 @@ func TestGetPageNote(t *testing.T) {
 func TestFakeAuthentication(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
 	r = fakeAuthenticateion(r)
-	if !session.IsAuthenticated(r) {
+	if !auth.IsAuthenticated(r) {
 		t.Error("fakeAuthenticateion should mark request authenticated.")
 		t.Fail()
 	}
@@ -154,9 +154,9 @@ func TestFakeAuthentication(t *testing.T) {
 
 func fakeAuthenticateion(r *http.Request) *http.Request {
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, session.AUTHENTICATED, true)
-	ctx = context.WithValue(ctx, session.USER_ID, 10)
-	ctx = context.WithValue(ctx, session.SESSION_ID, "fake_session_id")
+	ctx = context.WithValue(ctx, auth.AUTHENTICATED, true)
+	ctx = context.WithValue(ctx, auth.USER_ID, 10)
+	ctx = context.WithValue(ctx, auth.SESSION_ID, "fake_session_id")
 	return r.WithContext(ctx)
 }
 

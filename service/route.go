@@ -7,6 +7,7 @@ import (
 	"github.com/lpimem/hlcsrv/controller"
 )
 
+// returns an http.ServeMux instance for handling application http requests
 func MakeRoutes() *http.ServeMux {
 	mux := routes()
 	return wrapProcessors(mux)

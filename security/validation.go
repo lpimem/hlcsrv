@@ -10,11 +10,13 @@ import (
 
 var shaHash = sha512.New()
 
+// Hash passwd with a random salt. Returns the digest and the salt in hex encoded string.
 func Hash(passwd string) (string, string) {
 	slt := RandStringBytesMaskImprSrc(512)
 	return HashWithSlt(passwd, slt), slt
 }
 
+// Returns the digest in hex encoded string.
 func HashWithSlt(passwd string, slt string) string {
 	shaHash.Reset()
 	defer shaHash.Reset()
@@ -24,6 +26,7 @@ func HashWithSlt(passwd string, slt string) string {
 	return hex.EncodeToString(passwdHash)
 }
 
+// Hash passwd with slt, and compare the result with hash.
 func Validate(passwd string, slt string, hash string) bool {
 	reHash := HashWithSlt(passwd, slt)
 	calculated, err := hex.DecodeString(reHash)

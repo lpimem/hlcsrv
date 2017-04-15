@@ -21,6 +21,7 @@ const DEFAULT_PASSWD_STRENGTH = 32
 
 var src = rand.NewSource(time.Now().UnixNano())
 
+// RandStringBytesMaskImprSrc generates a string of random typable characters of length n
 func RandStringBytesMaskImprSrc(n int) string {
 	b := make([]byte, n)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!

@@ -1,10 +1,9 @@
-package controller
+package auth
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/storage"
 )
 
@@ -33,7 +32,7 @@ func TestUpdateGoogleUserSession(t *testing.T) {
 			}
 
 			lastAccess, err := storage.QuerySession(sInfo.Sid, sInfo.Uid)
-			suc = !session.IsSessionTimeout(*lastAccess) && err == nil
+			suc = !IsSessionTimeout(*lastAccess) && err == nil
 			if suc != tc.pass {
 				fmt.Println(err)
 				t.Fail()

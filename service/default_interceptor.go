@@ -1,10 +1,10 @@
 package service
 
-import "github.com/lpimem/hlcsrv/session"
+import "github.com/lpimem/hlcsrv/auth"
 
 func buildDefaultInterceptors() {
 	buildDefaultCookieChecker()
-	AddRequestInterceptor(session.Authenticate)
+	AddRequestInterceptor(auth.Authenticate)
 }
 
 func buildDefaultCookieChecker() {

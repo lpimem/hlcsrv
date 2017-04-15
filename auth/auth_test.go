@@ -1,17 +1,12 @@
-package session
+package auth
 
 import (
-	"testing"
-
-	"net/http/httptest"
-
-	"net/http"
-
 	"fmt"
-
-	"time"
-
+	"net/http"
+	"net/http/httptest"
 	"strconv"
+	"testing"
+	"time"
 
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/storage"
