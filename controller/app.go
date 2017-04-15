@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/hlccookie"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 func Index(w http.ResponseWriter, req *http.Request) {
@@ -42,19 +42,19 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 	}
 	_, err = w.Write(respJson)
 	if err != nil {
-		util.Log(err)
+		log.Error(err)
 	}
 }
 
 func GetPagenote(w http.ResponseWriter, req *http.Request) {
-	util.Log("GetPagenote...")
+	defer log.Trace("GetPagenote...")
 	if !requireAuth(w, req) {
-		util.Log("Not authorized...")
+		log.Warn("Not authorized...")
 		return
 	}
 	pn, err := parseGetNotesRequest(req)
 	if err != nil {
-		util.Log("Cannot parse request, error:", err)
+		log.Warn("Cannot parse request, error:", err)
 		var errMsg string
 		if conf.IsDebug() {
 			errMsg = fmt.Sprintln("Cannot parse request, error:", err)
@@ -69,7 +69,7 @@ func GetPagenote(w http.ResponseWriter, req *http.Request) {
 }
 
 func SavePagenote(w http.ResponseWriter, req *http.Request) {
-	util.Log("SavePagenote...")
+	defer log.Trace("SavePagenote...")
 	if !requirePost(w, req) {
 		return
 	}
@@ -78,7 +78,7 @@ func SavePagenote(w http.ResponseWriter, req *http.Request) {
 	}
 	pn, err := parseNewNotesRequest(req)
 	if err != nil {
-		util.Error("cannot parse request, error: ", err)
+		log.Warn("cannot parse request, error: ", err)
 		var errMsg string
 		if conf.IsDebug() {
 			errMsg = fmt.Sprintln("cannot parse request, error: ", err)
@@ -90,13 +90,13 @@ func SavePagenote(w http.ResponseWriter, req *http.Request) {
 	}
 	idList, err := newNotes(pn)
 	if err != nil {
-		util.Error("savePagenote: ", err)
+		log.Error("savePagenote: ", err)
 	}
 	writeRespMessage(w, nil, idList)
 }
 
 func DeletePagenote(w http.ResponseWriter, req *http.Request) {
-	util.Log("DeletePagenote...")
+	defer log.Trace("DeletePagenote...")
 	if !requirePost(w, req) {
 		return
 	}

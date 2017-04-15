@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/service"
 	"github.com/lpimem/hlcsrv/storage"
 	"github.com/lpimem/hlcsrv/util"
@@ -32,6 +33,6 @@ func serve(ip string, port int64) {
 	fmt.Println("listening at", addr)
 	err := server.ListenAndServe()
 	if err != nil {
-		util.Log("Error: ", err)
+		log.Error("Error: ", err)
 	}
 }

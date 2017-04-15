@@ -5,7 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 
-	"github.com/lpimem/hlcsrv/util"
+	"github.com/go-playground/log"
 )
 
 var shaHash = sha512.New()
@@ -28,12 +28,12 @@ func Validate(passwd string, slt string, hash string) bool {
 	reHash := HashWithSlt(passwd, slt)
 	calculated, err := hex.DecodeString(reHash)
 	if err != nil {
-		util.Log("error: Cannot hex decode hashed message")
+		log.Error("error: Cannot hex decode hashed message")
 		panic("Cannot hex decode hashed message")
 	}
 	hashBytes, err := hex.DecodeString(hash)
 	if err != nil {
-		util.Log(err)
+		log.Error(err)
 		return false
 	}
 	return subtle.ConstantTimeCompare(calculated, hashBytes) == 1

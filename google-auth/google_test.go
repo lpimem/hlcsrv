@@ -14,11 +14,13 @@ func validToken() string {
 //		t.Error("token should be valid", err)
 //		t.Fail()
 //	} else {
-//		util.Log(id.Audience, id.Subject, id.Expiry, id.Issuer, id.IssuedAt)
+//		log.Info(id.Audience, id.Subject, id.Expiry, id.Issuer, id.IssuedAt)
 //	}
 //}
 
 func init() {
 	// setup test client id and secret
-	configure(context.Background())
+	if err := configure(context.Background()); err != nil {
+		panic(err)
+	}
 }

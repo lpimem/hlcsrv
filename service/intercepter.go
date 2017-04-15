@@ -3,7 +3,7 @@ package service
 import (
 	"net/http"
 
-	"github.com/lpimem/hlcsrv/util"
+	"github.com/go-playground/log"
 )
 
 /*RequestInterceptor preprocess a request before it is handled
@@ -31,14 +31,14 @@ func AddRequestInterceptor(handler RequestInterceptor) {
 func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) (*http.Request, bool) {
 	var err error
 	for _, handle := range interceptors {
-		util.Debug("applying preprocessor:", handle)
+		log.Trace("applying preprocessor:", handle)
 		req, err = handle(req)
 		if err != nil {
-			util.Warn("error pre-processing", err)
+			log.Warn("error pre-processing", err)
 			http.Error(respWriter, err.Error(), http.StatusBadRequest)
 			return req, false
 		}
 	}
-	util.Debug("all pre-processors done.")
+	log.Trace("all pre-processors done.")
 	return req, true
 }

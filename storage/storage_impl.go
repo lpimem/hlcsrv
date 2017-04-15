@@ -15,6 +15,7 @@ import (
 
 	"strings"
 
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/util"
 )
@@ -100,7 +101,7 @@ func (s *SqliteStorage) Upsert(
 
 	query = fmt.Sprintf(template, table, snippetUpdateFields, snippetUpdateCond,
 		table, snippetInsertFields, snippetInsertValues)
-	util.Debug(query)
+	log.Debug(query)
 
 	queryParameters = append(parameters, keyValues...)
 	queryParameters = append(queryParameters, parameters...)
@@ -112,7 +113,7 @@ func (s *SqliteStorage) Upsert(
 func (s *SqliteStorage) QueryMetaList(uid uint32, pid uint32) []*hlcmsg.RangeMeta {
 	dict, err := s.QueryPagenote(uid, pid)
 	if err != nil {
-		util.Log("Error:", err)
+		log.Warn("Error:", err)
 		return []*hlcmsg.RangeMeta{}
 	} else {
 		return dict.GetPagenote(uid, pid).GetHighlights()
@@ -188,7 +189,7 @@ func (s *SqliteStorage) QueryPageId(url string) uint32 {
 			return rows.Scan(&id)
 		})
 	if err != nil {
-		util.Log("ignored error: ", err)
+		log.Warn("ignored error: ", err)
 	}
 	return id
 }
@@ -211,12 +212,12 @@ func (s *SqliteStorage) NewPage(title, url string) (id uint32) {
 		title, url,
 	)
 	if err != nil {
-		util.Log("ignored error:", err)
+		log.Warn("ignored error:", err)
 		return
 	}
 	lastId, err := rst.LastInsertId()
 	if err != nil {
-		util.Log("ignored error:", err)
+		log.Warn("ignored error:", err)
 		id = 0
 	} else {
 		id = uint32(lastId)
@@ -230,12 +231,12 @@ func (s *SqliteStorage) NewUser(name, email, password, slt string) (id uint32) {
 		name, email, password, slt,
 	)
 	if err != nil {
-		util.Log("ignored error: ", err)
+		log.Warn("ignored error: ", err)
 		return
 	}
 	lastId, err := r.LastInsertId()
 	if err != nil {
-		util.Log("ignored error: ", err)
+		log.Warn("ignored error: ", err)
 		return
 	}
 	id = uint32(lastId)
@@ -251,7 +252,7 @@ func (s *SqliteStorage) QueryUser(handle, password string) (id uint32) {
 			return rows.Scan(&id)
 		})
 	if err != nil {
-		util.Log("error querying user id :", err)
+		log.Warn("error querying user id :", err)
 	}
 	return
 }
@@ -260,8 +261,9 @@ func initDb(db *sql.DB) error {
 	fpath := util.GetAbsRunDirPath() + "/db/tables.sql"
 	createTables, err := ioutil.ReadFile(fpath)
 	if err != nil {
-		util.Log("Current dir: ", util.GetAbsRunDirPath())
-		util.Log("file path:", fpath)
+		log.Error("Cannot init db: ", err)
+		log.Error("    Current dir: ", util.GetAbsRunDirPath())
+		log.Error("    file path:", fpath)
 		return err
 	}
 	_, err = db.Exec(string(createTables))

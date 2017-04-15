@@ -1,8 +1,8 @@
 package storage
 
 import (
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/hlcmsg"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 type PagenoteDict map[uint32][]*hlcmsg.Pagenote
@@ -39,7 +39,7 @@ func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 			return n
 		}
 	}
-	util.Log("no pagenote found for", uid, pid)
+	log.Info("no pagenote found for", uid, pid)
 	return nil
 }
 

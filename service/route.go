@@ -3,8 +3,8 @@ package service
 import (
 	"net/http"
 
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/controller"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 func MakeRoutes() *http.ServeMux {
@@ -30,7 +30,7 @@ func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 	wrapper := http.NewServeMux()
 	wrapper.HandleFunc("/",
 		func(w http.ResponseWriter, r *http.Request) {
-			util.Debug(r.Method, "\t", r.URL.String())
+			log.Info(r.Method, "\t", r.URL.String())
 			//ctx := r.Context()
 			//ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
 			//defer cancel()
@@ -46,5 +46,5 @@ func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 
 func init() {
 	buildDefaultInterceptors()
-	util.Debug(len(interceptors), "interceptors loaded.")
+	log.Debug(len(interceptors), "interceptors loaded.")
 }

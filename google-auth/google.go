@@ -6,8 +6,8 @@ import (
 	"errors"
 
 	oidc "github.com/coreos/go-oidc"
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
-	"github.com/lpimem/hlcsrv/util"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
@@ -24,13 +24,13 @@ const redirectURL = "http://127.0.0.1:5556/auth/google/callback"
 func VerifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToken, error) {
 	idToken, err := verifier.Verify(ctx, rawToken)
 	if err != nil {
-		util.Log("WARN: Cannot verify token: ", err)
-		util.Log(rawToken)
+		log.Warn("Cannot verify google token: ", err)
+		log.Info(rawToken)
 		return nil, err
 	}
 	if err := verifyAud(ctx, idToken); err != nil {
-		util.Log("WARN: Cannot verify token: ", err)
-		util.Log(rawToken)
+		log.Warn(" Cannot verify google token: ", err)
+		log.Info(rawToken)
 		return nil, err
 	}
 	return idToken, nil
@@ -48,7 +48,7 @@ func verifyAud(ctx context.Context, idToken *oidc.IDToken) error {
 func configure(ctx context.Context) error {
 	provider, err := oidc.NewProvider(ctx, "https://accounts.google.com")
 	if err != nil {
-		util.Error("error setting up google authentication service", err)
+		log.Info("error setting up google authentication service", err)
 		return err
 	}
 	oidcConfig := &oidc.Config{
@@ -66,8 +66,22 @@ func configure(ctx context.Context) error {
 	return nil
 }
 
+func ensureGoogleAppConfig() error {
+	if clientID == "" || clientSecret == "" {
+		msg := "Cannot Find Google App Config"
+		log.Error(msg)
+		return errors.New(msg)
+	}
+	return nil
+}
+
 func init() {
-	util.Log("google client id:", clientID)
-	util.Log("google client secret:", clientSecret[:4])
-	configure(context.Background())
+	if err := ensureGoogleAppConfig(); err != nil {
+		panic(err)
+	}
+	log.Info("google client id:", clientID)
+	log.Info("google client secret:", clientSecret[:4])
+	if err := configure(context.Background()); err != nil {
+		panic(err)
+	}
 }

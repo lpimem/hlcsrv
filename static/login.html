@@ -16,15 +16,12 @@
         document.body.innerHTML = "only chrome browser is supported.";
     }
 
-
     let extensionId = "cdbkmcnjjgdmbgejfejpefefoaacobbg";
-
 
     $ = document.getElementById.bind(document);
 
     var HLC_UID = null;
     var HLC_TOKEN = null;
-
 
     function request(method, url, payload, onSuccess, onFail){
         let r = new XMLHttpRequest();
@@ -41,7 +38,6 @@
         r.onreadystatechange = onreadystatechange;
         r.send(payload);
     }
-
 
     function onHLCAuthResponse(resp){
         let suc = false;
@@ -60,6 +56,9 @@
             hlc_uid: HLC_UID,
             hlc_token: HLC_TOKEN
         }, function(response){
+            if (chrome.runtime.lastError){
+                log("ERROR: " + chrome.runtime.lastError.message);
+            }
             if (suc){
                 window.close();
             }

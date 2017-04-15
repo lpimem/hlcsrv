@@ -8,19 +8,19 @@ import (
 
 	"fmt"
 
+	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/storage"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 func newNotes(pn *hlcmsg.Pagenote) (*hlcmsg.IdList, error) {
 	errList := storage.SavePagenote(pn)
 	var err error = nil
 	if len(errList) > 0 {
-		util.Error("Errors saving pagenotes:")
+		log.Error("Errors saving pagenotes:")
 		for _, e := range errList {
-			util.Error("    ", e)
+			log.Error("    ", e)
 		}
 		err = errors.New(fmt.Sprintf("%d errors happed saving %d pagenotes", len(errList), len(pn.Highlights)))
 	}
@@ -31,7 +31,7 @@ func getNotes(pn *hlcmsg.Pagenote) *hlcmsg.Pagenote {
 	if pn != nil && pn.Uid > 0 {
 		return storage.QueryPagenote(pn.Uid, pn.Pageid)
 	}
-	util.Log("error, empty uid not supported")
+	log.Warn("getNotes: empty uid not supported")
 	return nil
 }
 
@@ -48,33 +48,32 @@ func rmNotes(toRemove *hlcmsg.IdList) *hlcmsg.IdList {
 func parseNewNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	payload, err := readRequestPayload(r)
 	if err != nil {
-		util.Debug("error loading payload", err)
 		return nil, err
 	}
 	if payload == nil || len(payload) == 0 {
-		util.Debug("empty payload")
+		log.Debug("empty payload")
 		return nil, errors.New("request payload is empty")
 	}
-	util.Debug("received request raw:", payload)
+	log.Trace("received request raw:", payload)
 	pn := &hlcmsg.Pagenote{}
 	if err = proto.Unmarshal(payload, pn); err != nil {
-		util.Log("Cannot parse Pagenote", err)
+		log.Debug("Cannot parse Pagenote", err)
 		return nil, err
 	}
-	util.Debug("parsed request:", pn.Pageid, pn.Uid, pn.Url, len(pn.Highlights))
+	log.Trace("parsed request:", pn.Pageid, pn.Uid, pn.Url, len(pn.Highlights))
 	patchPageId(pn)
 	return pn, nil
 }
 
 func patchPageId(pn *hlcmsg.Pagenote) error {
 	if pn.Pageid < 1 {
-		util.Debug("Cleaing url:", pn.Url)
+		log.Trace("Cleaing url:", pn.Url)
 		var err error
 		pn.Url, err = cleanUrl(pn.Url)
 		if err != nil {
 			return err
 		}
-		util.Debug("Cleaned url:", pn.Url)
+		log.Trace("Cleaned url:", pn.Url)
 		pn.Pageid = storage.QueryPageId(pn.Url)
 	}
 	return nil
@@ -88,10 +87,10 @@ func verifyPid(pid uint32) error {
 func cleanUrl(urlstr string) (string, error) {
 	u, err := url.Parse(urlstr)
 	if err != nil {
-		util.Log("Error parsing url", urlstr, err)
+		log.Warn("Error parsing url", urlstr, err)
 		return "", err
 	}
-	util.Log("parsed url:", u.String())
+	log.Trace("parsed url:", u.String())
 	if u.String() == "" {
 		return "", errors.New("url shouldn't be empty")
 	}

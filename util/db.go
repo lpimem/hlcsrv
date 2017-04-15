@@ -2,6 +2,7 @@ package util
 
 import (
 	"database/sql"
+	"github.com/go-playground/log"
 )
 
 func InTxWithDB(db *sql.DB, ops []func(tx *sql.Tx) error) error {
@@ -29,8 +30,8 @@ func WithInTx(tx *sql.Tx, ops []func(tx *sql.Tx) error) error {
 }
 
 func QueryDb(db *sql.DB, query string, args []interface{}, handler func(rowNo int, rows *sql.Rows) error) error {
-	Debug(query)
-	Debug(args...)
+	log.Debug(query)
+	log.Debug(args...)
 	rows, err := db.Query(query, args...)
 	return iterateRows(rows, err, handler)
 

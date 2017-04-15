@@ -1,6 +1,9 @@
 package storage
 
-import "github.com/lpimem/hlcsrv/util"
+import (
+	"github.com/go-playground/log"
+	"github.com/lpimem/hlcsrv/util"
+)
 
 func InitTestDb() {
 	InitStorage(util.GetAbsRunDirPath() + "/db/test.db")
@@ -49,7 +52,7 @@ func seedTestDb() error {
 func ResetTestDb() {
 	cleanDb()
 	seedTestDb()
-	util.Log("DB@", storage.path, " is reseted")
+	log.Info("DB@", storage.path, " is reseted")
 }
 
 func init() {

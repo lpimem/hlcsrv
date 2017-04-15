@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/session"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 func parseRemoveNotesRequest(r *http.Request) *hlcmsg.IdList {
@@ -19,7 +19,7 @@ func parseRemoveNotesRequest(r *http.Request) *hlcmsg.IdList {
 		return nil
 	}
 	if err = proto.Unmarshal(payload, ids); err != nil {
-		util.Log("Cannot parse IdList", err)
+		log.Debug("Cannot parse IdList", err)
 		return nil
 	}
 	return ids
@@ -33,12 +33,12 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	params := r.URL.Query()
 	if uid, err = strconv.ParseUint(
 		params.Get("uid"), 10, 32); err != nil {
-		util.Log("error cannot extract uid from request", err)
+		log.Debug("error cannot extract uid from request", err)
 		return nil, err
 	}
 	if pid, err = strconv.ParseUint(
 		params.Get("pid"), 10, 32); err != nil {
-		util.Log("warn cannot extract pid from request", err)
+		log.Debug("warn cannot extract pid from request", err)
 		pid = 0
 	}
 	pn := &hlcmsg.Pagenote{}
@@ -52,7 +52,7 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 		}
 	}
 	if err != nil {
-		util.Error("parseGetNotesRequest: cleaned url is empty")
+		log.Debug("parseGetNotesRequest: cleaned url is empty")
 		return nil, err
 	}
 	return pn, nil
@@ -61,7 +61,7 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 func readRequestPayload(r *http.Request) ([]byte, error) {
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		util.Log("Cannot read request body", err)
+		log.Debug("Cannot read request body", err)
 	}
 	return payload, err
 }
@@ -78,7 +78,7 @@ func writeRespMessage(w http.ResponseWriter, pn *hlcmsg.Pagenote, idlist *hlcmsg
 	}
 	buf, err := proto.Marshal(resp)
 	if err != nil {
-		util.Log("Error: cannot encode message ", resp, err)
+		log.Warn("Error: cannot encode message ", resp, err)
 		return false
 	}
 
@@ -86,13 +86,9 @@ func writeRespMessage(w http.ResponseWriter, pn *hlcmsg.Pagenote, idlist *hlcmsg
 	defer encoder.Close()
 	_, err = encoder.Write(buf)
 	if err != nil {
-		util.Log("Error: cannot write message to response", err)
+		log.Warn("Error: cannot write message to response", err)
 		return false
 	}
-	//if _, err = w.Write(buf); err != nil {
-	//	util.Log("Error: cannot write message to response", err)
-	//	return false
-	//}
 	return true
 }
 
@@ -113,7 +109,7 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 		if reason != nil {
 			errMsg = errMsg + ": " + reason.(string)
 		}
-		util.Debug(errMsg)
+		log.Warn(errMsg)
 		http.Error(w, errMsg, http.StatusUnauthorized)
 		authorized = false
 	}

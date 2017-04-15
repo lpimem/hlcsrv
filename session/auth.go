@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/hlccookie"
 	"github.com/lpimem/hlcsrv/storage"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 type context_key int
@@ -38,13 +38,13 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 	req = req.WithContext(ctx)
 	uid, sid, err = extractUidSid(req)
 	if err != nil {
-		util.Log("cannot extract uid/sid:", sid, uid, err)
+		log.Info("cannot extract uid/sid:", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
 		return req, nil
 	}
 	if err = VerifySession(sid, uid, nil); err != nil {
-		util.Log("invalid session", sid, uid, err)
+		log.Info("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
 		return req, nil
@@ -53,7 +53,7 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 	ctx = context.WithValue(ctx, USER_ID, uid)
 	ctx = context.WithValue(ctx, SESSION_ID, sid)
 	req = req.WithContext(ctx)
-	util.Log("request from", uid, "is authorized.")
+	log.Info("request from", uid, "is authorized.")
 	return req, nil
 }
 
@@ -109,7 +109,7 @@ func VerifySession(sid string, uid uint32, lastAccess *time.Time) error {
 	if lastAccess == nil {
 		lastAccess, err = storage.QuerySession(sid, uid)
 		if err != nil {
-			util.Log("cannot find session for ", sid, uid, err)
+			log.Warn("cannot find session for ", sid, uid, err)
 			return err
 		}
 		if lastAccess == nil {

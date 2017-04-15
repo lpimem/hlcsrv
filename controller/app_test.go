@@ -9,11 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/session"
 	"github.com/lpimem/hlcsrv/storage"
-	"github.com/lpimem/hlcsrv/util"
 )
 
 const URL_NEW_PAGENOTE = "/pagenote/new"
@@ -61,7 +61,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 		return
 	}
 	var err error
-	util.Log("encoded resp body:", w.Body.String())
+	log.Trace("encoded resp body:", w.Body.String())
 	decoder := base64.NewDecoder(base64.StdEncoding, w.Body)
 	respBody, err := ioutil.ReadAll(decoder)
 	if err != nil {
@@ -69,7 +69,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 		t.Fail()
 		return
 	}
-	util.Log("base64 decoded body:", respBody)
+	log.Trace("base64 decoded body:", respBody)
 	pnResp := &hlcmsg.HlcResp{}
 	err = proto.Unmarshal(respBody, pnResp)
 	if err != nil {
