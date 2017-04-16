@@ -120,7 +120,8 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, err
 		return PagenoteDict{}, errors.New("uid and url cannot both be 0")
 	}
 	var queryBuilder bytes.Buffer
-	queryBuilder.WriteString(`select id, anchor, start, startOffset, end, endOffset, page, author from hlc_range where 1=1 `)
+	queryBuilder.WriteString(
+		`select id, anchor, start, startOffset, end, endOffset, page, author, option from hlc_range where 1=1 `)
 	var parameters = []interface{}{}
 	if uid > 0 {
 		queryBuilder.WriteString(" and author = ?")
@@ -134,8 +135,8 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, err
 	result := PagenoteDict{}
 	err := util.QueryDb(s.DB, query, parameters, func(rowno int, rows *sql.Rows) error {
 		var id, startOffset, endOffset, page, author uint32
-		var anchor, start, end string
-		err := rows.Scan(&id, &anchor, &start, &startOffset, &end, &endOffset, &page, &author)
+		var anchor, start, end, option string
+		err := rows.Scan(&id, &anchor, &start, &startOffset, &end, &endOffset, &page, &author, &option)
 		if err != nil {
 			return err
 		}
@@ -151,6 +152,7 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, err
 			End:         end,
 			EndOffset:   endOffset,
 			Text:        "",
+			Option:      option,
 		}
 		note.Highlights = append(note.Highlights, meta)
 		return nil
@@ -159,7 +161,10 @@ func (s *SqliteStorage) QueryPagenote(uid uint32, pid uint32) (PagenoteDict, err
 }
 
 func (s *SqliteStorage) NewRangeMeta(uid uint32, pid uint32, m *hlcmsg.RangeMeta) (uint32, error) {
-	r, err := s.DB.Exec(`insert into hlc_range(anchor, start, startOffset, end, endOffset, text, page, author) values(?, ?, ?, ?, ?, ?, ?, ?)`, m.Anchor, m.Start, m.StartOffset, m.End, m.EndOffset, m.Text, pid, uid)
+	r, err := s.DB.Exec(
+		`insert into hlc_range(anchor, start, startOffset, end, endOffset, text, page, author, option)
+values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		m.Anchor, m.Start, m.StartOffset, m.End, m.EndOffset, m.Text, pid, uid, m.Option)
 	if err != nil {
 		return 0, err
 	}

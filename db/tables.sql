@@ -36,6 +36,7 @@ create table if not exists `hlc_range`(
   `end` varchar(255), 
   `endOffset` integer, 
   `text` varchar(1024),
+  `option` varchar(1024) default '',
   `page` integer not null,
   `author` integer not null, 
   `ctime` timestamp default current_timestamp,
