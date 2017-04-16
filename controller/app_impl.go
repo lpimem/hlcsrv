@@ -1,12 +1,10 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
-
-	"errors"
-
-	"fmt"
 
 	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"

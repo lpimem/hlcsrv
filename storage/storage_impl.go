@@ -1,23 +1,18 @@
 package storage
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
-
-	// ignore warning
-	_ "github.com/mattn/go-sqlite3"
-
-	"bytes"
-
-	"fmt"
-
 	"strings"
 
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 	"github.com/lpimem/hlcsrv/util"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SqliteStorage struct {

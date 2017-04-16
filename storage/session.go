@@ -2,10 +2,8 @@ package storage
 
 import (
 	"database/sql"
-
-	"time"
-
 	"errors"
+	"time"
 
 	"github.com/lpimem/hlcsrv/util"
 )

@@ -5,6 +5,7 @@ import (
 	"github.com/lpimem/hlcsrv/hlcmsg"
 )
 
+// a map of user id and list of page notes
 type PagenoteDict map[uint32][]*hlcmsg.Pagenote
 
 func (d PagenoteDict) getOrCreatePagenoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
@@ -17,6 +18,8 @@ func (d PagenoteDict) getOrCreatePagenoteList(uid uint32) (notes []*hlcmsg.Pagen
 	return
 }
 
+// return pagenotes associated with a user name
+// return nil if not found
 func (d PagenoteDict) GetPagenoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
 	if _, ok := d[uid]; ok {
 		notes = d[uid]
@@ -26,12 +29,14 @@ func (d PagenoteDict) GetPagenoteList(uid uint32) (notes []*hlcmsg.Pagenote) {
 	return
 }
 
+// add a pagenote to a user's list
 func (d *PagenoteDict) AddPagenote(uid uint32, note *hlcmsg.Pagenote) {
 	notes := d.getOrCreatePagenoteList(uid)
 	notes = append(notes, note)
 	(*d)[uid] = notes
 }
 
+// get pagenote with pid from user uid's list
 func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	notes := d.getOrCreatePagenoteList(uid)
 	for _, n := range notes {
@@ -43,6 +48,7 @@ func (d *PagenoteDict) GetPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	return nil
 }
 
+// create a new pagenote with id pid and add to user uid's list
 func (d *PagenoteDict) NewPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	note := &hlcmsg.Pagenote{
 		Pageid:     pid,

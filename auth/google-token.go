@@ -1,15 +1,13 @@
 package auth
 
 import (
-	"os"
-
 	"errors"
+	"os"
 
 	oidc "github.com/coreos/go-oidc"
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"golang.org/x/net/context"
-	//"golang.org/x/oauth2"
 )
 
 var (
@@ -18,15 +16,6 @@ var (
 	verifier     *oidc.IDTokenVerifier
 	//config       oauth2.Config
 )
-
-// GoogleTokenClaim represents fields extracted from an IDToken
-type GoogleTokenClaim struct {
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	Name          string `json:"name"`
-	Picture       string `json:"picture"`
-	Locale        string `json:"locale"`
-}
 
 /**VerifyGoogleAuthIdToken parse and validate the raw google sign-in token string.
  */

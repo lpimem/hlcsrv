@@ -57,6 +57,7 @@ create table if not exists `hlc_comment`(
 create table if not exists `hlc_google_auth`(
   `google_id` varchar primary key,
   `uid` integer,
+  `picture` varchar(32),
   `last_access` timestamp default current_timestamp,
   `ctime` timestamp default current_timestamp
 );

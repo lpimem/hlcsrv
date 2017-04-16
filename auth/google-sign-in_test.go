@@ -8,20 +8,44 @@ import (
 )
 
 func TestUpdateGoogleUserSession(t *testing.T) {
+	storage.ResetTestDb()
 	testcases := []struct {
-		name  string
-		gid   string
-		email string
-		pass  bool
+		name    string
+		profile *storage.GoogleTokenClaim
+		pass    bool
 	}{
-		{"existing gid", "example@google.com", "example@google.com", true},
-		{"new gid", "example_2@google.com", "example_2@google.com", true},
-		{"duplicate email", "example_3@google.com", "example@google.com", false},
+		{
+			"existing gid",
+			&storage.GoogleTokenClaim{
+				Email: "example@google.com",
+				Sub:   "100000",
+				Name:  "Test User",
+			},
+			true,
+		},
+		{
+			"new gid",
+			&storage.GoogleTokenClaim{
+				Email: "example_2@google.com",
+				Sub:   "1000011",
+				Name:  "Test User 11",
+			},
+			true,
+		},
+		{
+			"duplicate email",
+			&storage.GoogleTokenClaim{
+				Email: "example_2@google.com",
+				Sub:   "1000112",
+				Name:  "Test User 3",
+			},
+			false,
+		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			var suc bool
-			sInfo, err := updateGoogleUserSession(tc.gid, tc.email)
+			sInfo, err := updateGoogleUserSession(tc.profile)
 			suc = sInfo != nil && err == nil
 			if suc != tc.pass {
 				fmt.Println(err)
@@ -30,9 +54,8 @@ func TestUpdateGoogleUserSession(t *testing.T) {
 			if sInfo == nil {
 				return
 			}
-
 			lastAccess, err := storage.QuerySession(sInfo.Sid, sInfo.Uid)
-			suc = !IsSessionTimeout(*lastAccess) && err == nil
+			suc = err == nil && !IsSessionTimeout(*lastAccess)
 			if suc != tc.pass {
 				fmt.Println(err)
 				t.Fail()
