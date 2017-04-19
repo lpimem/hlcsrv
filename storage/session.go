@@ -61,7 +61,8 @@ func UpdateSession(sid string, uid uint32) error {
 	if sid == "" {
 		return errors.New("sid cannot be empty")
 	}
-	_, err := storage.Upsert(
+	_, err := Upsert(
+		storage.DB,
 		"hlc_session",
 		[]string{"id", "uid", "last_access"},
 		[]string{"id"},

@@ -60,6 +60,11 @@ func (s *SqliteStorage) NewUserByGoogleProfile(profile *GoogleTokenClaim) (newUs
 		func(tx *sql.Tx) error {
 			log.Debugf("%s | %s, %s, ...", query, profile.Name, profile.Email)
 			r, err := tx.Exec(query, profile.Name, profile.Email, hash, slt)
+			//r, err := Upsert(tx, "hlc_user",
+			//	[]string{"name", "email", "password", "_slt"},
+			//	[]string{"email"},
+			//	[]interface{}{profile.Name, profile.Email, hash, slt},
+			//	[]interface{}{profile.Email})
 			if err != nil {
 				return err
 			}

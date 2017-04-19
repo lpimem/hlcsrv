@@ -42,6 +42,7 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 	}
 	rawToken = string(reqBody)
 	if sessionInfo, err = auth.AuthenticateGoogleUser(req.Context(), rawToken); err != nil {
+		log.Warn("Cannot authenticate google user ", err.Error())
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}

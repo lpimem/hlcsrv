@@ -2,11 +2,16 @@ package util
 
 import (
 	"database/sql"
+
 	"github.com/go-playground/log"
 )
 
 func InTxWithDB(db *sql.DB, ops []func(tx *sql.Tx) error) error {
-	tx, err := db.Begin()
+	var (
+		tx  *sql.Tx
+		err error
+	)
+	tx, err = db.Begin()
 	if err != nil {
 		return err
 	}
@@ -17,7 +22,8 @@ func InTxWithDB(db *sql.DB, ops []func(tx *sql.Tx) error) error {
 			tx.Commit()
 		}
 	}()
-	return WithInTx(tx, ops)
+	err = WithInTx(tx, ops)
+	return err
 }
 
 func WithInTx(tx *sql.Tx, ops []func(tx *sql.Tx) error) error {
@@ -33,16 +39,16 @@ func QueryDb(db *sql.DB, query string, args []interface{}, handler func(rowNo in
 	log.Debug(query)
 	log.Debug(args...)
 	rows, err := db.Query(query, args...)
-	return iterateRows(rows, err, handler)
+	return IterateRows(rows, err, handler)
 
 }
 
 func QueryTx(tx *sql.DB, query string, args []interface{}, handler func(rowNo int, rows *sql.Rows) error) error {
 	rows, err := tx.Query(query, args...)
-	return iterateRows(rows, err, handler)
+	return IterateRows(rows, err, handler)
 }
 
-func iterateRows(rows *sql.Rows, err error, handler func(rowNo int, rows *sql.Rows) error) error {
+func IterateRows(rows *sql.Rows, err error, handler func(rowNo int, rows *sql.Rows) error) error {
 	if err != nil {
 		return err
 	}
