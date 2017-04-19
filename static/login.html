@@ -12,80 +12,101 @@
 
 </div>
 <script>
-    if (!chrome && !chrome.runtime){
-        document.body.innerHTML = "only chrome browser is supported.";
-    }
+    +function(exports){
+        if (!chrome && !chrome.runtime){
+            document.body.innerHTML = "only chrome browser is supported.";
+            return;
+        }
 
-    let extensionId = "cdbkmcnjjgdmbgejfejpefefoaacobbg";
+        let extensionId = window.location.hash;
+        if (extensionId){
+            extensionId = extensionId.replace("#", "");
+        } else {
+            log("Error: cannot find chrome extension.");
+        }
 
-    $ = document.getElementById.bind(document);
+        let $ = document.getElementById.bind(document);
+        exports.$ = $;
 
-    var HLC_UID = null;
-    var HLC_TOKEN = null;
+        let HLC_UID = null;
+        let HLC_TOKEN = null;
 
-    function request(method, url, payload, onSuccess, onFail){
-        let r = new XMLHttpRequest();
-        r.open(method, url, true);
-        function onreadystatechange(){
-            if (r.readyState === XMLHttpRequest.DONE){
-                if (r.status >= 200 && r.status <300 || r.status === 304){
-                    onSuccess(r.response);
-                } else {
-                    onFail(r.status, r.statusText)
+//        function startGoogleSignIn(){
+//            document.body.innerHTML += '<div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"><\/div>';
+//            document.body.innerHTML += '<script src="https://apis.google.com/js/platform.js" async defer><\/script>';
+//        }
+
+        function request(method, url, payload, onSuccess, onFail){
+            let r = new XMLHttpRequest();
+            r.open(method, url, true);
+            function onreadystatechange(){
+                if (r.readyState === XMLHttpRequest.DONE){
+                    if (r.status >= 200 && r.status <300 || r.status === 304){
+                        onSuccess(r.response);
+                    } else {
+                        onFail(r.status, r.statusText)
+                    }
                 }
             }
+            r.onreadystatechange = onreadystatechange;
+            r.send(payload);
         }
-        r.onreadystatechange = onreadystatechange;
-        r.send(payload);
-    }
+        exports.request = request;
 
-    function onHLCAuthResponse(resp){
-        let suc = false;
-        try{
-            let respObj = JSON.parse(resp);
-            HLC_UID = parseInt(respObj.uid);
-            HLC_TOKEN = respObj.token;
-            suc = true;
-            log("LOG IN SUCCESS " + HLC_UID);
-        } catch( e ){
-            console.error(e);
-            log("ERROR: " + e.toString());
+        function onHLCAuthResponse(resp){
+            let suc = false;
+            try{
+                let respObj = JSON.parse(resp);
+                HLC_UID = parseInt(respObj.uid);
+                HLC_TOKEN = respObj.token;
+                suc = true;
+            } catch( e ){
+                console.error(e);
+                log("ERROR: " + e.toString());
+            }
+            chrome.runtime.sendMessage(extensionId, {
+                login_success: suc,
+                hlc_uid: HLC_UID,
+                hlc_token: HLC_TOKEN
+            }, function(response){
+                if (chrome.runtime.lastError){
+                    log("ERROR: " + chrome.runtime.lastError.message);
+                    log("  extension id: " + extensionId);
+                    return;
+                }
+                if (suc){
+                    window.close();
+                }
+            });
         }
-        chrome.runtime.sendMessage(extensionId, {
-            login_success: suc,
-            hlc_uid: HLC_UID,
-            hlc_token: HLC_TOKEN
-        }, function(response){
-            if (chrome.runtime.lastError){
-                log("ERROR: " + chrome.runtime.lastError.message);
-            }
-            if (suc){
-                window.close();
-            }
-        });
-    }
+        exports.onHLCAuthResponse = onHLCAuthResponse;
 
-    function onHLCAuthRespError(code, msg){
-        console.error(code, msg);
-        log("ERROR: " + msg);
-    }
+        function onHLCAuthRespError(code, msg){
+            console.error(code, msg);
+            log("ERROR: " + msg);
+        }
+        exports.onHLCAuthRespError = onHLCAuthRespError;
 
-    function doHLCAuth(id_token){
-        request("POST", "/google_auth", id_token, onHLCAuthResponse, onHLCAuthRespError)
-    }
+        function doHLCAuth(id_token){
+            request("POST", "/google_auth", id_token, onHLCAuthResponse, onHLCAuthRespError)
+        }
+        exports.doHLCAuth = doHLCAuth;
 
-    function onSignIn(googleUser) {
-        // The ID token you need to pass to your backend:
-        var id_token = googleUser.getAuthResponse().id_token;
-        console.log("ID Token: " + id_token);
-        doHLCAuth(id_token);
-    }
+        // Google Sign-In API
+        function onSignIn(googleUser) {
+            // The ID token you need to pass to your backend:
+            var id_token = googleUser.getAuthResponse().id_token;
+            doHLCAuth(id_token);
+        }
+        exports.onSignIn = onSignIn;
 
-    function log(text){
-        let log = $("hlc-log");
-        log.innerText += "\r\n";
-        log.innerText += text;
-    }
+        function log(entry){
+            let log = $("hlc-log");
+            log.innerText += "\r\n";
+            log.innerText += entry;
+        }
+        exports.log = log;
+    }(window);
 </script>
 </body>
 </html>
