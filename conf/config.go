@@ -4,7 +4,7 @@ import "os"
 
 // should the app run in debugging mode.
 func IsDebug() bool {
-	return true
+	return false
 }
 
 /**SessionSecret is the secret used to sign your cookies

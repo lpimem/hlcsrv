@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"strconv"
+
 	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/auth"
@@ -92,6 +94,70 @@ func TestNewPagenoteNormal(t *testing.T) {
 		t.Fail()
 		return
 	}
+}
+
+func BenchmarkSavePagenote(b *testing.B) {
+	var w *httptest.ResponseRecorder
+	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
+	buf, _ := proto.Marshal(reqPn)
+	//requests := []*http.Request{}
+	//for n := 0; n < b.N; n++ {
+	//	reader := bytes.NewReader(buf)
+	//	post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+	//	post = fakeAuthenticateion(post)
+	//	requests = append(requests, post)
+	//}
+	for n := 0; n < b.N; n++ {
+		reader := bytes.NewReader(buf)
+		post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+		post = fakeAuthenticateion(post)
+		w = httptest.NewRecorder()
+		SavePagenote(w, post)
+	}
+}
+
+func BenchmarkSavePagenoteP(b *testing.B) {
+	var w *httptest.ResponseRecorder
+	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
+	buf, _ := proto.Marshal(reqPn)
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			reader := bytes.NewReader(buf)
+			post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+			post = fakeAuthenticateion(post)
+			w = httptest.NewRecorder()
+			SavePagenote(w, post)
+		}
+	})
+}
+
+func BenchmarkGetPagenote(b *testing.B) {
+	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
+	req = fakeAuthenticateion(req)
+	tcs := []int{10, 100, 1000}
+	for _, tc := range tcs {
+		storage.ResetTestDb()
+		storage.SeedDbForBench(tc)
+		b.Run(strconv.FormatInt(int64(tc), 10), func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				recorder := httptest.NewRecorder()
+				GetPagenote(recorder, req)
+			}
+		})
+	}
+}
+
+func BenchmarkGetPagenoteP(b *testing.B) {
+	storage.ResetTestDb()
+	storage.SeedDbForBench(100)
+	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
+	req = fakeAuthenticateion(req)
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			recorder := httptest.NewRecorder()
+			GetPagenote(recorder, req)
+		}
+	})
 }
 
 func TestGetPageNote(t *testing.T) {

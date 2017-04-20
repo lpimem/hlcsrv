@@ -49,6 +49,18 @@ func seedTestDb() error {
 	return err
 }
 
+func SeedDbForBench(n int) error {
+	var err error
+	for i := 0; i < n; i++ {
+		_, err = storage.DB.Exec(`insert into hlc_range(anchor, start, startOffset, end, endOffset, text, page, author)
+		values ("#c", "#c/1", 0, "#c/12", 32, "This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text ", 1, 1);`)
+		if err != nil {
+			break
+		}
+	}
+	return err
+}
+
 func ResetTestDb() {
 	cleanDb()
 	seedTestDb()

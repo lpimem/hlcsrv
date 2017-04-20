@@ -8,8 +8,10 @@ import (
 )
 
 func init() {
-	cLog := console.New()
-	log.RegisterHandler(cLog, log.AllLevels...)
+	if conf.IsDebug() {
+		cLog := console.New()
+		log.RegisterHandler(cLog, log.AllLevels...)
+	}
 
 	sLog, err := syslog.New("", "", "hlcsrv", nil)
 	if err != nil {

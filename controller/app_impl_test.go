@@ -118,6 +118,7 @@ func mockPageNote(uid uint32, pid uint32, url string) *hlcmsg.Pagenote {
 				StartOffset: 0,
 				End:         "/2",
 				EndOffset:   3,
+				Text:        "This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text This is the selected text ",
 			},
 		},
 	}

@@ -33,18 +33,18 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	params := r.URL.Query()
 	if uid, err = strconv.ParseUint(
 		params.Get("uid"), 10, 32); err != nil {
-		log.Debug("error cannot extract uid from request", err)
+		log.Error("cannot extract uid from request ", err)
 		return nil, err
 	}
 	if pid, err = strconv.ParseUint(
 		params.Get("pid"), 10, 32); err != nil {
-		log.Debug("warn cannot extract pid from request", err)
 		pid = 0
 	}
 	pn := &hlcmsg.Pagenote{}
 	pn.Uid = uint32(uid)
 	if pid <= 0 {
 		pn.Url = params.Get("url")
+		defer log.Trace("creating new page profile for url: ", pn.Url)
 		err = patchPageId(pn)
 	} else {
 		if err = verifyPid(uint32(pid)); err == nil {
