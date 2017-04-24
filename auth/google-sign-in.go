@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc"
-	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/storage"
 )
 
@@ -37,38 +36,39 @@ func AuthenticateGoogleUser(ctx context.Context, rawToken string) (*SessionInfo,
 	return updateGoogleUserSession(&profile)
 }
 
-func updateGoogleUserSession(profile *storage.GoogleTokenClaim) (*SessionInfo, error) {
+func updateGoogleUserSession(profile *storage.GoogleTokenClaim) (session *SessionInfo, err error) {
 	var (
 		uid        uint32
 		sid        string
 		lastAccess *time.Time
-		err        error
 	)
 	uid, err = storage.GetOrCreateUidForGoogleUser(profile)
 	if err != nil {
-		log.Debug(err)
-		return nil, err
+		return
 	}
-	sInfo, err := storage.QuerySessionByUid(uid)
+	lastSession, err := storage.QuerySessionByUid(uid)
 	if err != nil {
-		return nil, err
+		return
 	}
-	if sInfo == nil || sInfo.LastAccess == nil || sInfo.Sid == "" {
+	if lastSession == nil || lastSession.LastAccess == nil || lastSession.Sid == "" {
 		// no existing session, create new.
-		sid = computeRandomSessionId(profile.Sub)
-		err = storage.UpdateSession(sid, uid)
-		if err != nil {
-			return nil, err
-		}
+		sid, err = createSessionForGoogleUser(profile.Sub, uid)
 	} else {
 		// verify if existing session timed out
-		sid = sInfo.Sid
-		lastAccess = sInfo.LastAccess
+		sid = lastSession.Sid
+		lastAccess = lastSession.LastAccess
 		if err = VerifySession(sid, uid, lastAccess); err != nil {
-			return nil, err
+			sid, err = createSessionForGoogleUser(profile.Sub, uid)
+		} else {
+			err = storage.UpdateSession(sid, uid)
 		}
-		// refresh session.
-		go storage.UpdateSession(sid, uid)
 	}
-	return &SessionInfo{uid, sid}, nil
+	session = &SessionInfo{uid, sid}
+	return
+}
+
+func createSessionForGoogleUser(sub string, uid uint32) (sid string, err error) {
+	sid = computeRandomSessionId(sub)
+	err = storage.UpdateSession(sid, uid)
+	return
 }
