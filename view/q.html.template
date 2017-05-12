@@ -3,6 +3,7 @@
 
 <head>
   <meta name="encoding" value="utf-8" />
+  <title> Highlights Query </title>
   <style>
     body {
       font-family: Helvetica, arial, sans-serif;
