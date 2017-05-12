@@ -102,7 +102,6 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 				var urlLabel string
 				if bytes, ok := pageTitle.([]byte); ok {
 					urlLabel = strings.TrimSpace(string(bytes))
-					pageTitle = urlLabel
 				}
 				if bytes, ok := pageURI.([]byte); ok {
 					urlStr := string(bytes)
@@ -114,7 +113,7 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 					}
 					pageURI = template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", urlStr, urlLabel))
 				}
-				record = append(record, count, hlt.Text, pageTitle, pageURI)
+				record = append(record, count, hlt.Text, pageURI)
 				s.Result = append(s.Result, record)
 			}
 		}
