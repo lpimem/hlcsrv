@@ -112,7 +112,7 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 					if len(urlLabel) > 30 {
 						urlLabel = urlLabel[:30]
 					}
-					pageURI = template.HTML(fmt.Sprintf("<a href='%s'>%s...</a>", urlStr, urlLabel))
+					pageURI = template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", urlStr, urlLabel))
 				}
 				record = append(record, count, hlt.Text, pageTitle, pageURI)
 				s.Result = append(s.Result, record)
