@@ -6,6 +6,9 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+
+	"strings"
 
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
@@ -75,6 +78,15 @@ func postQuery(w http.ResponseWriter, req *http.Request) {
 	qTemplate.Execute(w, status)
 }
 
+func extractURLDomain(uri string) string {
+	u, err := url.Parse(uri)
+	if err != nil {
+		log.Warn("Error parsing url", uri, err)
+		return uri
+	}
+	return u.Hostname()
+}
+
 func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.PagenoteAddon) *queryStatus {
 	var s = &queryStatus{}
 	s.Query = q
@@ -87,12 +99,16 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 				record := make([]interface{}, 0, 4)
 				pageTitle := pages[hlt.Id][0]
 				pageURI := pages[hlt.Id][1]
+				var urlLabel string
 				if bytes, ok := pageTitle.([]byte); ok {
-					pageTitle = string(bytes)
+					urlLabel = strings.TrimSpace(string(bytes))
+					pageTitle = urlLabel
 				}
 				if bytes, ok := pageURI.([]byte); ok {
 					urlStr := string(bytes)
-					urlLabel := urlStr
+					if urlLabel == "" {
+						urlLabel = extractURLDomain(urlStr)
+					}
 					if len(urlLabel) > 30 {
 						urlLabel = urlLabel[:30]
 					}

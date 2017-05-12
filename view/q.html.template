@@ -13,6 +13,11 @@
       padding: 50px;
     }
 
+    #layout{
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
     table {
       border-collapse: collapse;
       margin: 5px;
@@ -29,6 +34,12 @@
     td:first-child {
       font-style: italic;
       color: #909090;
+    }
+
+    td:last-child {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     tr:hover td {
@@ -71,32 +82,32 @@
 </head>
 
 <body>
-  <div>
+  <div id="layout">
     <form method="POST" action="/q">
       <input id="ipt_query" type="text" name='query' value="{{.Query}}"></input>
       <input id="ipt_submit" type="submit" value="Query" />
     </form>
-  </div>
-
-  {{if .}} {{if .Error}}
-  <div class="error">
-    Error: {{.Error}}
-  </div>
-  {{else}}
-  <div class='pale'> {{.Count}} results found. </div>
-  <table>
-    <tbody>
-      {{range .Result}}
-      <tr class="border-bottom">
-        {{range .}}
-        <td> {{.}} </td>
-        {{end}}
-      </tr>
+    {{if .}} 
+      {{if .Error}}
+      <div class="error">
+        Error: {{.Error}}
+      </div>
+      {{else}}
+        <div class='pale'> {{.Count}} results found. </div>
+        <table>
+          <tbody>
+            {{range .Result}}
+            <tr class="border-bottom">
+              {{range .}}
+              <td> {{.}} </td>
+              {{end}}
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
       {{end}}
-    </tbody>
-  </table>
-  {{end}}
-  <br> {{end}}
+    {{end}}
+  </div>
 </body>
 
 </html>
