@@ -12,13 +12,12 @@ import (
 	"github.com/lpimem/hlcsrv/hlccookie"
 )
 
-/**Index renders the default page of the website.
- */
+// Index renders the default page of the website.
 func Index(w http.ResponseWriter, req *http.Request) {
 	http.NotFound(w, req)
 }
 
-/**AuthenticateGoogleUser handles post request to authenticate a google
+/*AuthenticateGoogleUser handles post request to authenticate a google
 user. Expecting a newly generated google token in the request body.
 The token will be parsed and validated. See also:
 1. https://developers.google.com/identity/sign-in/web/sign-in
@@ -47,19 +46,19 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	respJson, err := json.Marshal(sessionInfo)
+	respJSON, err := json.Marshal(sessionInfo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
 	hlccookie.SetAuthCookies(w, sessionInfo.Sid, sessionInfo.Uid)
-	_, err = w.Write(respJson)
+	_, err = w.Write(respJSON)
 	if err != nil {
 		log.Error(err)
 	}
 }
 
-/**GetPagenote handles get request to fetch notes for a user and a url
+/*GetPagenote handles get request to fetch notes for a user and a url
 Query parameters:
     1. uid user identifier, must match the request session
     2. pid [optional] page id for the url
@@ -98,7 +97,7 @@ func GetPagenote(w http.ResponseWriter, req *http.Request) {
 	writeRespMessage(w, pn, nil)
 }
 
-/**SavePagenote handles save pagenote post request.
+/*SavePagenote handles save pagenote post request.
 Expecting the body of the request to be a serialized hlcmsg/Pagenote message.
 Response:
   Serialized @hlcmsg.HlcResp message encoded in base64.

@@ -14,7 +14,7 @@ const (
 	HUSER_ID    = "x-hlc-uid"
 )
 
-// defines authentication session info
+// SessionInfo defines authentication session info
 type SessionInfo struct {
 	Uid uint32 `json:"uid"`
 	Sid string `json:"token"`

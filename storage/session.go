@@ -8,6 +8,7 @@ import (
 	"github.com/lpimem/hlcsrv/util"
 )
 
+// QuerySession checks if a session exists. If so, returns the last access time of the session, or error.
 func QuerySession(
 	sid string,
 	uid uint32,
@@ -27,14 +28,15 @@ func QuerySession(
 	return &lastAccess, err
 }
 
-func QuerySessionByUid(
+// QuerySessionByUID check if a user has a session record
+func QuerySessionByUID(
 	uid uint32,
 ) (*struct {
 	Sid        string
 	LastAccess *time.Time
 }, error) {
 	const query = "select id, last_access from hlc_session where uid = ?"
-	var sid string = ""
+	var sid string
 	var lastAccess time.Time
 	err := util.QueryDb(storage.DB, query,
 		[]interface{}{uid},
@@ -54,6 +56,7 @@ func QuerySessionByUid(
 	return &result, nil
 }
 
+// UpdateSession refreshes a session
 func UpdateSession(sid string, uid uint32) error {
 	if uid < 1 {
 		return errors.New("uid cannot be 0")

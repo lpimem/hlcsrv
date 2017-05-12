@@ -5,22 +5,22 @@ import (
 	"testing"
 )
 
-func TestSqliteStorage_QueryUidByGoogleId(t *testing.T) {
+func TestSqliteStorage_QueryUIDByGoogleID(t *testing.T) {
 	ResetTestDb()
-	uid := storage.QueryUidByGoogleId("100000")
+	uid := storage.QueryUIDByGoogleID("100000")
 	if uid != 1 {
 		t.Error("should return uid 1, got:", uid)
 		t.Fail()
 	}
 
-	uid = storage.QueryUidByGoogleId("100001")
+	uid = storage.QueryUIDByGoogleID("100001")
 	if uid != 0 {
 		t.Error("should return uid 0 (not found), got:", uid)
 		t.Fail()
 	}
 }
 
-func TestSqliteStorage_NewUserByGoogleId(t *testing.T) {
+func TestSqliteStorage_NewUserByGoogleID(t *testing.T) {
 	ResetTestDb()
 	tcs := []struct {
 		name    string
@@ -95,13 +95,13 @@ func TestSqliteStorage_NewUserByGoogleId(t *testing.T) {
 	}
 }
 
-func TestGetOrCreateUidForGoogleUser(t *testing.T) {
+func TestGetOrCreateUIDForGoogleUser(t *testing.T) {
 	ResetTestDb()
 	var (
 		uid uint32
 		err error
 	)
-	uid, err = GetOrCreateUidForGoogleUser(&GoogleTokenClaim{
+	uid, err = GetOrCreateUIDForGoogleUser(&GoogleTokenClaim{
 		Email: "abc@example.com",
 		Sub:   "100000",
 		Name:  "abc",
@@ -111,7 +111,7 @@ func TestGetOrCreateUidForGoogleUser(t *testing.T) {
 		t.Fail()
 	}
 
-	uid, err = GetOrCreateUidForGoogleUser(&GoogleTokenClaim{
+	uid, err = GetOrCreateUIDForGoogleUser(&GoogleTokenClaim{
 		Email: "abc2@example.com",
 		Sub:   "100010",
 		Name:  "abc",
@@ -121,17 +121,17 @@ func TestGetOrCreateUidForGoogleUser(t *testing.T) {
 		t.Fail()
 	}
 
-	uid_2, err := GetOrCreateUidForGoogleUser(&GoogleTokenClaim{
+	uid2, err := GetOrCreateUIDForGoogleUser(&GoogleTokenClaim{
 		Email: "abc2@example.com",
 		Sub:   "100010",
 		Name:  "abc",
 	})
-	if uid_2 != uid || err != nil {
-		t.Error("should return uid=", uid, "got:", uid_2, err)
+	if uid2 != uid || err != nil {
+		t.Error("should return uid=", uid, "got:", uid2, err)
 		t.Fail()
 	}
 
-	uid, err = GetOrCreateUidForGoogleUser(&GoogleTokenClaim{
+	uid, err = GetOrCreateUIDForGoogleUser(&GoogleTokenClaim{
 		Email: "abc2@example.com",
 		Sub:   "100012",
 		Name:  "abc",

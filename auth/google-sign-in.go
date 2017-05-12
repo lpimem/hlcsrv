@@ -9,7 +9,7 @@ import (
 	"github.com/lpimem/hlcsrv/storage"
 )
 
-/**AuthenticateGoogleUser authenticates a google user with rawToken
+/*AuthenticateGoogleUser authenticates a google user with rawToken
 The token will be parsed and validated.
 
 See also:
@@ -24,7 +24,7 @@ func AuthenticateGoogleUser(ctx context.Context, rawToken string) (*SessionInfo,
 		idToken *oidc.IDToken
 		err     error
 	)
-	idToken, err = VerifyGoogleAuthIdToken(ctx, rawToken)
+	idToken, err = VerifyGoogleAuthIDToken(ctx, rawToken)
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,11 @@ func updateGoogleUserSession(profile *storage.GoogleTokenClaim) (session *Sessio
 		sid        string
 		lastAccess *time.Time
 	)
-	uid, err = storage.GetOrCreateUidForGoogleUser(profile)
+	uid, err = storage.GetOrCreateUIDForGoogleUser(profile)
 	if err != nil {
 		return
 	}
-	lastSession, err := storage.QuerySessionByUid(uid)
+	lastSession, err := storage.QuerySessionByUID(uid)
 	if err != nil {
 		return
 	}
@@ -68,7 +68,7 @@ func updateGoogleUserSession(profile *storage.GoogleTokenClaim) (session *Sessio
 }
 
 func createSessionForGoogleUser(sub string, uid uint32) (sid string, err error) {
-	sid = computeRandomSessionId(sub)
+	sid = computeRandomSessionID(sub)
 	err = storage.UpdateSession(sid, uid)
 	return
 }

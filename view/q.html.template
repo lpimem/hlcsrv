@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="encoding" value="utf-8" />
+  <style>
+    body {
+      font-family: Helvetica, arial, sans-serif;
+      font-weight: lighter;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      padding: 50px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin: 5px;
+    }
+
+    .border-bottom {
+      border-bottom: #E0E0E0 1px solid;
+    }
+
+    td {
+      padding: 5px;
+    }
+
+    td:first-child {
+      font-style: italic;
+      color: #909090;
+    }
+
+    tr:hover td {
+      background-color: #E0E0E0;
+    }
+
+    form {
+      line-height: 1em;
+      font-size: 1.5em;
+      font-weight: lighter;
+    }
+
+    #ipt_query {
+      min-width: 300px;
+      padding: 0 5px;
+      font-size: 1.2em;
+      font-weight: lighter;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .pale {
+      color: #909090;
+      margin: 20px 0 0 0;
+    }
+
+    input[type=submit] {
+      padding: 5px 15px;
+      background: #ccc;
+      border: 0 none;
+      cursor: pointer;
+      -webkit-border-radius: 5px;
+      border-radius: 5px;
+      font-size: 1.2em;
+      font-weight: lighter;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <form method="POST" action="/q">
+      <input id="ipt_query" type="text" name='query' value="{{.Query}}"></input>
+      <input id="ipt_submit" type="submit" value="Query" />
+    </form>
+  </div>
+
+  {{if .}} {{if .Error}}
+  <div class="error">
+    Error: {{.Error}}
+  </div>
+  {{else}}
+  <div class='pale'> {{.Count}} results found. </div>
+  <table>
+    <tbody>
+      {{range .Result}}
+      <tr class="border-bottom">
+        {{range .}}
+        <td> {{.}} </td>
+        {{end}}
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{end}}
+  <br> {{end}}
+</body>
+
+</html>

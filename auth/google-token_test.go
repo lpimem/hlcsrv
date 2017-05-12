@@ -10,7 +10,7 @@ func validToken() string {
 //	return
 //	var token = validToken() // fetch/generate a valid token
 //	ctx := context.Background()
-//	if id, err := VerifyGoogleAuthIdToken(ctx, token); err != nil {
+//	if id, err := VerifyGoogleAuthIDToken(ctx, token); err != nil {
 //		t.Error("token should be valid", err)
 //		t.Fail()
 //	} else {

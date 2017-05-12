@@ -1,112 +1,111 @@
 <html lang="en">
+
 <head>
     <title>Login</title>
     <meta name="google-signin-scope" content="email">
     <meta name="google-signin-client_id" content="900696138865-vdsgcariehvat8nkluvltoq79n0rhqr9.apps.googleusercontent.com">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
+
 <body>
 
-<div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"></div>
-<div id='hlc-log' class="hlc-log">
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"></div>
+    <div id='hlc-log' class="hlc-log">
 
-</div>
-<script>
-    +function(exports){
-        if (!chrome && !chrome.runtime){
-            document.body.innerHTML = "only chrome browser is supported.";
-            return;
-        }
+    </div>
+    <script>
+        +function (exports) {
+            if (!chrome && !chrome.runtime) {
+                document.body.innerHTML = "only chrome browser is supported.";
+                return;
+            }
 
-        let extensionId = window.location.hash;
-        if (extensionId){
-            extensionId = extensionId.replace("#", "");
-        } else {
-            log("Error: cannot find chrome extension.");
-        }
+            let extensionId = window.location.hash;
+            if (extensionId) {
+                extensionId = extensionId.replace("#", "");
+            } else {
+                log("Login from browser.");
+            }
 
-        let $ = document.getElementById.bind(document);
-        exports.$ = $;
+            let HLC_UID = null;
+            let HLC_TOKEN = null;
 
-        let HLC_UID = null;
-        let HLC_TOKEN = null;
-
-//        function startGoogleSignIn(){
-//            document.body.innerHTML += '<div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"><\/div>';
-//            document.body.innerHTML += '<script src="https://apis.google.com/js/platform.js" async defer><\/script>';
-//        }
-
-        function request(method, url, payload, onSuccess, onFail){
-            let r = new XMLHttpRequest();
-            r.open(method, url, true);
-            function onreadystatechange(){
-                if (r.readyState === XMLHttpRequest.DONE){
-                    if (r.status >= 200 && r.status <300 || r.status === 304){
-                        onSuccess(r.response);
-                    } else {
-                        onFail(r.status, r.statusText)
+            function request(method, url, payload, onSuccess, onFail) {
+                let r = new XMLHttpRequest();
+                r.open(method, url, true);
+                function onreadystatechange() {
+                    if (r.readyState === XMLHttpRequest.DONE) {
+                        if (r.status >= 200 && r.status < 300 || r.status === 304) {
+                            onSuccess(r.response);
+                        } else {
+                            onFail(r.status, r.statusText)
+                        }
                     }
                 }
+                r.onreadystatechange = onreadystatechange;
+                r.send(payload);
             }
-            r.onreadystatechange = onreadystatechange;
-            r.send(payload);
-        }
-        exports.request = request;
+            exports.request = request;
 
-        function onHLCAuthResponse(resp){
-            let suc = false;
-            try{
-                let respObj = JSON.parse(resp);
-                HLC_UID = parseInt(respObj.uid);
-                HLC_TOKEN = respObj.token;
-                suc = true;
-            } catch( e ){
-                console.error(e);
-                log("ERROR: " + e.toString());
+            function onHLCAuthResponse(resp) {
+                let suc = false;
+
+                try {
+                    let respObj = JSON.parse(resp);
+                    HLC_UID = parseInt(respObj.uid);
+                    HLC_TOKEN = respObj.token;
+                    suc = true;
+                } catch (e) {
+                    console.error(e);
+                    log("ERROR: " + e.toString());
+                }
+
+                if (extensionId) {
+                    chrome.runtime.sendMessage(extensionId, {
+                        login_success: suc,
+                        hlc_uid: HLC_UID,
+                        hlc_token: HLC_TOKEN
+                    }, function (response) {
+                        if (chrome.runtime.lastError) {
+                            log("ERROR: " + chrome.runtime.lastError.message);
+                            log("  extension id: " + extensionId);
+                            return;
+                        }
+                        if (suc) {
+                            window.close();
+                        }
+                    });
+                }
             }
-            chrome.runtime.sendMessage(extensionId, {
-                login_success: suc,
-                hlc_uid: HLC_UID,
-                hlc_token: HLC_TOKEN
-            }, function(response){
-                if (chrome.runtime.lastError){
-                    log("ERROR: " + chrome.runtime.lastError.message);
-                    log("  extension id: " + extensionId);
-                    return;
-                }
-                if (suc){
-                    window.close();
-                }
-            });
-        }
-        exports.onHLCAuthResponse = onHLCAuthResponse;
+            exports.onHLCAuthResponse = onHLCAuthResponse;
 
-        function onHLCAuthRespError(code, msg){
-            console.error(code, msg);
-            log("ERROR: " + msg);
-        }
-        exports.onHLCAuthRespError = onHLCAuthRespError;
+            function onHLCAuthRespError(code, msg) {
+                console.error(code, msg);
+                log("ERROR: " + msg);
+            }
+            exports.onHLCAuthRespError = onHLCAuthRespError;
 
-        function doHLCAuth(id_token){
-            request("POST", "/google_auth", id_token, onHLCAuthResponse, onHLCAuthRespError)
-        }
-        exports.doHLCAuth = doHLCAuth;
+            function doHLCAuth(id_token) {
+                request("POST", "/google_auth", id_token, onHLCAuthResponse, onHLCAuthRespError)
+            }
+            exports.doHLCAuth = doHLCAuth;
 
-        // Google Sign-In API
-        function onSignIn(googleUser) {
-            // The ID token you need to pass to your backend:
-            var id_token = googleUser.getAuthResponse().id_token;
-            doHLCAuth(id_token);
-        }
-        exports.onSignIn = onSignIn;
+            // Google Sign-In API
+            function onSignIn(googleUser) {
+                // The ID token you need to pass to your backend:
+                var id_token = googleUser.getAuthResponse().id_token;
+                doHLCAuth(id_token);
+            }
+            exports.onSignIn = onSignIn;
 
-        function log(entry){
-            let log = $("hlc-log");
-            log.innerText += "\r\n";
-            log.innerText += entry;
-        }
-        exports.log = log;
-    }(window);
-</script>
+            function log(entry) {
+                let log = document.getElementById("hlc-log");
+                log.innerText += "\r\n";
+                log.innerText += entry;
+            }
+            exports.log = log;
+        }(window);
+    </script>
 </body>
+
 </html>

@@ -10,11 +10,12 @@ import (
 	"github.com/go-playground/log"
 )
 
+//Executable represents objects that has a Exec method
 type Executable interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
-/**Upsert performs `update on insert duplicated` query.
+/*Upsert performs `update on insert duplicated` query.
 Note, this method uses unchecked string format to build the query.
 You should never use user's input as the value for table, fields, and keys.
 */
@@ -27,13 +28,13 @@ func Upsert(
 	keyValues []interface{},
 ) (r sql.Result, err error) {
 	if len(fields) != len(parameters) {
-		return nil, errors.New("Numbers of fields and parameters do not match.")
+		return nil, errors.New("numbers of fields and parameters do not match")
 	}
 	if len(keys) != len(keyValues) {
-		return nil, errors.New("Numbers of keys and keyValues do not match.")
+		return nil, errors.New("numbers of keys and keyValues do not match")
 	}
 	if len(keys) < 1 {
-		return nil, errors.New("Numbers of keys cannot be 0")
+		return nil, errors.New("numbers of keys cannot be 0")
 	}
 
 	var (

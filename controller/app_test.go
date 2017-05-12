@@ -18,12 +18,12 @@ import (
 	"github.com/lpimem/hlcsrv/storage"
 )
 
-const URL_NEW_PAGENOTE = "/pagenote/new"
+const URLNewPagenote = "/pagenote/new"
 
 func TestNewPagenotePostOnly(t *testing.T) {
 	// post only
 	var w *httptest.ResponseRecorder
-	get := httptest.NewRequest("GET", URL_NEW_PAGENOTE, nil)
+	get := httptest.NewRequest("GET", URLNewPagenote, nil)
 	get = fakeAuthenticateion(get)
 	w = httptest.NewRecorder()
 	SavePagenote(w, get)
@@ -38,7 +38,7 @@ func TestNewPagenoteNoEmptyReq(t *testing.T) {
 
 	// post empty
 	var post *http.Request
-	post = httptest.NewRequest("POST", URL_NEW_PAGENOTE, nil)
+	post = httptest.NewRequest("POST", URLNewPagenote, nil)
 	post = fakeAuthenticateion(post)
 	w = httptest.NewRecorder()
 	SavePagenote(w, post)
@@ -53,7 +53,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
 	buf, _ := proto.Marshal(reqPn)
 	reader := bytes.NewReader(buf)
-	post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+	post := httptest.NewRequest("POST", URLNewPagenote, reader)
 	post = fakeAuthenticateion(post)
 	w = httptest.NewRecorder()
 	SavePagenote(w, post)
@@ -103,13 +103,13 @@ func BenchmarkSavePagenote(b *testing.B) {
 	//requests := []*http.Request{}
 	//for n := 0; n < b.N; n++ {
 	//	reader := bytes.NewReader(buf)
-	//	post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+	//	post := httptest.NewRequest("POST", URLNewPagenote, reader)
 	//	post = fakeAuthenticateion(post)
 	//	requests = append(requests, post)
 	//}
 	for n := 0; n < b.N; n++ {
 		reader := bytes.NewReader(buf)
-		post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+		post := httptest.NewRequest("POST", URLNewPagenote, reader)
 		post = fakeAuthenticateion(post)
 		w = httptest.NewRecorder()
 		SavePagenote(w, post)
@@ -123,7 +123,7 @@ func BenchmarkSavePagenoteP(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			reader := bytes.NewReader(buf)
-			post := httptest.NewRequest("POST", URL_NEW_PAGENOTE, reader)
+			post := httptest.NewRequest("POST", URLNewPagenote, reader)
 			post = fakeAuthenticateion(post)
 			w = httptest.NewRecorder()
 			SavePagenote(w, post)

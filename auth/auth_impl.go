@@ -10,22 +10,21 @@ import (
 	"github.com/lpimem/hlcsrv/security"
 )
 
-func extractUidSid(req *http.Request) (uid uint32, sid string, err error) {
-	uid, sid, err = extractUidSidFromCookies(req)
+func extractUIDSid(req *http.Request) (uid uint32, sid string, err error) {
+	uid, sid, err = extractUIDSidFromCookies(req)
 	if err != nil {
 		var err2 error
-		uid, sid, err2 = extractUidSidFromRequestHeader(req)
+		uid, sid, err2 = extractUIDSidFromRequestHeader(req)
 		if err2 != nil {
 			err = errors.New(err.Error() + " & " + err2.Error())
 			return
-		} else {
-			err = nil
 		}
+		err = nil
 	}
 	return
 }
 
-func extractUidSidFromCookies(req *http.Request) (uid uint32, sid string, err error) {
+func extractUIDSidFromCookies(req *http.Request) (uid uint32, sid string, err error) {
 	var c *http.Cookie
 	if uid, err = hlccookie.GetRequestUID(req); err != nil {
 		return
@@ -37,7 +36,7 @@ func extractUidSidFromCookies(req *http.Request) (uid uint32, sid string, err er
 	return
 }
 
-func extractUidSidFromRequestHeader(req *http.Request) (uid uint32, sid string, err error) {
+func extractUIDSidFromRequestHeader(req *http.Request) (uid uint32, sid string, err error) {
 	var uid64 uint64
 	uid64, err = strconv.ParseUint(req.Header.Get(HUSER_ID), 10, 32)
 	if err != nil {
@@ -51,7 +50,7 @@ func extractUidSidFromRequestHeader(req *http.Request) (uid uint32, sid string, 
 	return
 }
 
-func computeRandomSessionId(seed string) string {
+func computeRandomSessionID(seed string) string {
 	once := security.RandStringBytesMaskImprSrc(32)
 	return security.HashWithSlt(once, seed)
 }

@@ -32,7 +32,7 @@ func TestQuerySession(t *testing.T) {
 	}
 }
 
-func TestQuerySessionByUid(t *testing.T) {
+func TestQuerySessionByUID(t *testing.T) {
 	var tcs = []struct {
 		name string
 		uid  int
@@ -44,7 +44,7 @@ func TestQuerySessionByUid(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			r, err := QuerySessionByUid(uint32(tc.uid))
+			r, err := QuerySessionByUID(uint32(tc.uid))
 			suc := r != nil && err == nil && r.LastAccess != nil && r.Sid != ""
 			if suc != tc.pass {
 				fmt.Println(err)

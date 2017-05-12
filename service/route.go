@@ -7,7 +7,7 @@ import (
 	"github.com/lpimem/hlcsrv/controller"
 )
 
-// returns an http.ServeMux instance for handling application http requests
+// MakeRoutes returns an http.ServeMux instance for handling application http requests
 func MakeRoutes() *http.ServeMux {
 	mux := routes()
 	return wrapProcessors(mux)
@@ -19,9 +19,9 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/pagenote/new", controller.SavePagenote)
 	mux.HandleFunc("/pagenote", controller.GetPagenote)
 	mux.HandleFunc("/google_auth", controller.AuthenticateGoogleUser)
+	mux.HandleFunc("/q", controller.HandleQuery)
 	fs := http.FileServer(
 		http.Dir("static"))
-	// http.Dir(util.GetAbsRunDirPath() + "static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/", controller.Index)
 	return mux

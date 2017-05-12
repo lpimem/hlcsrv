@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/auth"
+	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/hlcmsg"
 )
 
@@ -45,7 +46,7 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	if pid <= 0 {
 		pn.Url = params.Get("url")
 		defer log.Trace("creating new page profile for url: ", pn.Url)
-		err = patchPageId(pn)
+		err = patchPageID(pn)
 	} else {
 		if err = verifyPid(uint32(pid)); err == nil {
 			pn.Pageid = uint32(pid)
@@ -105,8 +106,8 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 	if !auth.IsAuthenticated(r) {
 		ctx := r.Context()
 		reason := ctx.Value(auth.REASON)
-		var errMsg string = "not authenticated"
-		if reason != nil {
+		var errMsg = "not authenticated"
+		if reason != nil && conf.IsDebug() {
 			errMsg = errMsg + ": " + reason.(string)
 		}
 		log.Warn(errMsg)

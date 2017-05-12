@@ -17,7 +17,7 @@ func TestQueryNotesByPid(t *testing.T) {
 	testQueryNotes(0, 1, "pid", t)
 }
 
-func TestQueryNotesByUidAndPid(t *testing.T) {
+func TestQueryNotesByUIDAndPid(t *testing.T) {
 	ResetTestDb()
 	testQueryNotes(1, 1, "uid and pid", t)
 }
@@ -110,14 +110,14 @@ func TestDeleteRangeMeta(t *testing.T) {
 	}
 }
 
-func TestQueryPageId(t *testing.T) {
+func TestQueryPageID(t *testing.T) {
 	ResetTestDb()
-	pid := storage.QueryPageId("http://example.com")
+	pid := storage.QueryPageID("http://example.com")
 	if pid != 1 {
 		t.Error("Should get 1 for page id, but got", pid)
 		t.Fail()
 	}
-	pid = storage.QueryPageId("notexist.example.com")
+	pid = storage.QueryPageID("notexist.example.com")
 	if pid != 0 {
 		t.Error("Shouldn't get pid != 0 for unknown uri, but got:", pid)
 		t.Fail()
@@ -132,8 +132,8 @@ func TestNewPage(t *testing.T) {
 		t.Error("created page id should be larger than 0")
 		t.Fail()
 	}
-	queriedId := storage.QueryPageId(url)
-	if queriedId != pid {
+	queriedID := storage.QueryPageID(url)
+	if queriedID != pid {
 		t.Error("queried id does not match created id")
 		t.Fail()
 	}
@@ -167,17 +167,81 @@ func TestNewUser(t *testing.T) {
 		t.Error("created user id should be > 0", uid)
 		t.Fail()
 	}
-	queriedId := storage.QueryUser(uname, passwd)
-	if queriedId < 1 {
+	queriedID := storage.QueryUser(uname, passwd)
+	if queriedID < 1 {
 		t.Error("cannot query created user")
 		t.Fail()
 	}
-	if queriedId != uid {
-		t.Error("quried ID not matching created id", queriedId, uid)
+	if queriedID != uid {
+		t.Error("quried ID not matching created id", queriedID, uid)
 		t.Fail()
 	}
 }
 
 func init() {
 	ResetTestDb()
+}
+
+func countPagenoteDictItems(d PagenoteDict) int {
+	var sum int
+	for _, ls := range d {
+		sum += len(ls)
+	}
+	return sum
+}
+
+func TestQueryPagenoteFuzzy(t *testing.T) {
+	/*
+		func (s *SqliteStorage) QueryPagenoteFuzzy(
+			uid uint32, uriPattern string) (PagenoteDict, PagenoteAddon, error)
+	*/
+	type testcase struct {
+		// testcase name
+		Name string
+		// query user id
+		UID uint32
+		// query uri pattern
+		URI string
+		// expected result count
+		Count int
+		// should execute successfully without error
+		Success bool
+	}
+
+	tcs := []*testcase{
+		&testcase{"Valid Query", 1, "example", 1, true},
+		&testcase{"NO UID", 0, "example", 1, true},
+		&testcase{"NO URL", 1, "", 1, true},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.Name, func(t *testing.T) {
+			ResetTestDb()
+			pd, addons, err := storage.QueryPagenoteFuzzy(tc.UID, tc.URI)
+			nPdItem := countPagenoteDictItems(pd)
+			if nPdItem != len(addons) {
+				t.Error("count of pagenotes dismatch with count of addons")
+				t.Fail()
+				return
+			}
+			if tc.Success && err != nil {
+				t.Error(err)
+				t.Fail()
+				return
+			}
+			var fail bool
+			if nPdItem != tc.Count {
+				t.Error("count of pagenotes dismatch")
+				fail = true
+			}
+			if len(addons) != tc.Count {
+				t.Error("count of addons dismatch")
+				fail = true
+			}
+			if fail {
+				t.Fail()
+			}
+		})
+	}
+
 }

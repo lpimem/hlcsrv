@@ -93,7 +93,7 @@ func TestCleanUrl(t *testing.T) {
 	for _, tc := range tcs {
 		u := tc[0]
 		ex := tc[1]
-		got, err := cleanUrl(u)
+		got, err := cleanURL(u)
 		if err != nil {
 			t.Error("error should'nt happen", err)
 			t.Fail()

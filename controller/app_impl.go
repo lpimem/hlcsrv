@@ -14,15 +14,15 @@ import (
 
 func newNotes(pn *hlcmsg.Pagenote) (*hlcmsg.IdList, error) {
 	errList := storage.SavePagenote(pn)
-	var err error = nil
+	var err error
 	if len(errList) > 0 {
 		log.Error("Errors saving pagenotes:")
 		for _, e := range errList {
 			log.Error("    ", e)
 		}
-		err = errors.New(fmt.Sprintf("%d errors happed saving %d pagenotes", len(errList), len(pn.Highlights)))
+		err = fmt.Errorf("%d errors happed saving %d pagenotes", len(errList), len(pn.Highlights))
 	}
-	return getPagenoteMetaIds(pn), err
+	return getPagenoteMetaIDs(pn), err
 }
 
 func getNotes(pn *hlcmsg.Pagenote) *hlcmsg.Pagenote {
@@ -59,20 +59,20 @@ func parseNewNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 		return nil, err
 	}
 	log.Trace("parsed request:", pn.Pageid, pn.Uid, pn.Url, len(pn.Highlights))
-	patchPageId(pn)
+	patchPageID(pn)
 	return pn, nil
 }
 
-func patchPageId(pn *hlcmsg.Pagenote) error {
+func patchPageID(pn *hlcmsg.Pagenote) error {
 	if pn.Pageid < 1 {
 		log.Trace("Cleaing url:", pn.Url)
 		var err error
-		pn.Url, err = cleanUrl(pn.Url)
+		pn.Url, err = cleanURL(pn.Url)
 		if err != nil {
 			return err
 		}
 		log.Trace("Cleaned url:", pn.Url)
-		pn.Pageid = storage.QueryPageId(pn.Url)
+		pn.Pageid = storage.QueryPageID(pn.Url)
 	}
 	return nil
 }
@@ -82,7 +82,7 @@ func verifyPid(pid uint32) error {
 	return err
 }
 
-func cleanUrl(urlstr string) (string, error) {
+func cleanURL(urlstr string) (string, error) {
 	u, err := url.Parse(urlstr)
 	if err != nil {
 		log.Warn("Error parsing url", urlstr, err)
@@ -100,7 +100,7 @@ func cleanUrl(urlstr string) (string, error) {
 	return u.String(), nil
 }
 
-func getPagenoteMetaIds(pn *hlcmsg.Pagenote) *hlcmsg.IdList {
+func getPagenoteMetaIDs(pn *hlcmsg.Pagenote) *hlcmsg.IdList {
 	arr := []uint32{}
 	for _, m := range pn.Highlights {
 		arr = append(arr, m.Id)

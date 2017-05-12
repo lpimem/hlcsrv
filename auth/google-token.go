@@ -17,9 +17,8 @@ var (
 	//config       oauth2.Config
 )
 
-/**VerifyGoogleAuthIdToken parse and validate the raw google sign-in token string.
- */
-func VerifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToken, error) {
+// VerifyGoogleAuthIDToken parses and validate the raw google sign-in token string.
+func VerifyGoogleAuthIDToken(ctx context.Context, rawToken string) (*oidc.IDToken, error) {
 	if err := ensureGoogleAppConfig(); err != nil {
 		panic(err)
 	}
@@ -39,7 +38,7 @@ func VerifyGoogleAuthIdToken(ctx context.Context, rawToken string) (*oidc.IDToke
 
 func verifyAud(ctx context.Context, idToken *oidc.IDToken) error {
 	for _, aud := range idToken.Audience {
-		if aud == conf.GoogleSignInAppId() {
+		if aud == conf.GoogleSignInAppID() {
 			return nil
 		}
 	}

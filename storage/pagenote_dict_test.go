@@ -30,23 +30,23 @@ func TestGetPagenoteList(t *testing.T) {
 func TestNewPagenoteList(t *testing.T) {
 	ins := mock()
 
-	const newUid = uint32(2)
+	const newUID = uint32(2)
 	const pid = 2
 
-	nilNote := ins.GetPagenoteList(newUid)
+	nilNote := ins.GetPagenoteList(newUID)
 
 	if nilNote != nil {
 		t.Error("expecting nil but got ", nilNote)
 		t.Fail()
 	}
 
-	ins.AddPagenote(newUid, &hlcmsg.Pagenote{
-		Uid:        newUid,
+	ins.AddPagenote(newUID, &hlcmsg.Pagenote{
+		Uid:        newUID,
 		Pageid:     pid,
 		Highlights: []*hlcmsg.RangeMeta{},
 	})
 
-	query := ins.GetPagenoteList(newUid)
+	query := ins.GetPagenoteList(newUID)
 
 	if query == nil {
 		t.Error("query shouldn't be nil")
@@ -72,7 +72,7 @@ func TestNewPagenoteList(t *testing.T) {
 		t.Fail()
 	}
 
-	query = ins.GetPagenoteList(newUid)
+	query = ins.GetPagenoteList(newUID)
 
 	if query == nil {
 		t.Error("2 query shouldn't be nil")

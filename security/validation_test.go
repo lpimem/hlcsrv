@@ -13,7 +13,7 @@ func TestHashWithSlt(t *testing.T) {
 	var (
 		passwd, hash, slt, rehash string
 	)
-	passwd = RandStringBytesMaskImprSrc(DEFAULT_PASSWD_STRENGTH)
+	passwd = RandStringBytesMaskImprSrc(DefaultPasswdStrength)
 	hash, slt = Hash(passwd)
 
 	fmt.Println("passwd:\t", passwd)
@@ -41,7 +41,7 @@ func TestValidate(t *testing.T) {
 	var (
 		passwd, hash, slt string
 	)
-	passwd = RandStringBytesMaskImprSrc(DEFAULT_PASSWD_STRENGTH)
+	passwd = RandStringBytesMaskImprSrc(DefaultPasswdStrength)
 	hash, slt = Hash(passwd)
 
 	fmt.Println("passwd:\t", passwd)
@@ -53,7 +53,7 @@ func TestValidate(t *testing.T) {
 		t.Fail()
 	}
 
-	slt = RandStringBytesMaskImprSrc(DEFAULT_PASSWD_STRENGTH)
+	slt = RandStringBytesMaskImprSrc(DefaultPasswdStrength)
 	if Validate(passwd, slt, hash) {
 		t.Error("tampered slt should be invalid")
 		t.Fail()

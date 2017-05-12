@@ -5,8 +5,9 @@ import (
 	"github.com/lpimem/hlcsrv/hlcmsg"
 )
 
-var storage *SqliteStorage = nil
+var storage *SqliteStorage
 
+// InitStorage initialize a default storage instance
 func InitStorage(path string) {
 	if storage != nil {
 		log.Warn("WARN:", path, "is not inited as storage as storage was already registered at ", storage.path)
@@ -16,6 +17,7 @@ func InitStorage(path string) {
 	storage = NewSqliteStorage(path)
 }
 
+// QueryPagenoteByUser select all pagenotes of a user
 func QueryPagenoteByUser(uid uint32) []*hlcmsg.Pagenote {
 	notes, err := storage.QueryPagenote(uid, 0)
 	if err != nil {
@@ -25,15 +27,17 @@ func QueryPagenoteByUser(uid uint32) []*hlcmsg.Pagenote {
 	return notes[uid]
 }
 
-func QueryPagenoteByUrl(url string) PagenoteDict {
-	pid := storage.QueryPageId(url)
+//QueryPagenoteByURI selects all pagenotes on a URI
+func QueryPagenoteByURI(url string) PagenoteDict {
+	pid := storage.QueryPageID(url)
 	notes, err := storage.QueryPagenote(0, pid)
 	if err != nil {
-		log.Alert("error QueryPagenoteByUrl, url:", url, "pid", pid, err)
+		log.Alert("error QueryPagenoteByURI, url:", url, "pid", pid, err)
 	}
 	return notes
 }
 
+// QueryPagenote selects pagenotes for a specified user an page
 func QueryPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	notes, err := storage.QueryPagenote(uid, pid)
 	if err != nil {
@@ -43,6 +47,7 @@ func QueryPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	return notes.GetPagenote(uid, pid)
 }
 
+// DeleteRangeMetas delete list of meta from db
 func DeleteRangeMetas(idList []uint32) []uint32 {
 	deleted := []uint32{}
 	for _, id := range idList {
@@ -56,24 +61,27 @@ func DeleteRangeMetas(idList []uint32) []uint32 {
 	return deleted
 }
 
-func QueryPageId(url string) uint32 {
+// QueryPageID returns the ID of page
+func QueryPageID(url string) uint32 {
 	log.Trace("Querying id for page ", url)
-	id := storage.QueryPageId(url)
+	id := storage.QueryPageID(url)
 	if id < 1 {
 		id = storage.NewPage("", url)
 		log.Trace("new page id", id, url)
 	}
 	if id < 1 {
-		id = storage.QueryPageId(url)
+		id = storage.QueryPageID(url)
 	}
 	log.Trace("page id for ", url, " is ", id)
 	return id
 }
 
+// QueryPage selects the URI of a page id
 func QueryPage(pid uint32) (string, error) {
 	return storage.QueryPage(pid)
 }
 
+// SavePagenote insert or update pagenotes
 func SavePagenote(pn *hlcmsg.Pagenote) []error {
 	// storage.SavePagenote()
 	errs := []error{}
@@ -88,4 +96,10 @@ func SavePagenote(pn *hlcmsg.Pagenote) []error {
 		}
 	}
 	return errs
+}
+
+// QueryUserPagenoteByURI select pagenotes on similar URIs for user
+func QueryUserPagenoteByURI(uid uint32, uri string) (PagenoteDict, PagenoteAddon, error,
+) {
+	return storage.QueryPagenoteFuzzy(uid, uri)
 }
