@@ -81,21 +81,57 @@ func TestAuthenticate(t *testing.T) {
 					req, err = setByHeader(req, tc.UID, tc.Sid)
 				}
 				req, err = Authenticate(req)
-				if err != nil {
-					fmt.Println("Authenticate should return no error")
-					t.Fail()
-				}
 				if IsAuthenticated(req) != tc.Suc {
 					fmt.Println(req.Context().Value(AUTHENTICATED))
 					fmt.Println(req.Context().Value(USER_ID))
 					fmt.Println(req.Context().Value(SESSION_ID))
 					fmt.Println(req.Context().Value(REASON))
+					if err != nil {
+						fmt.Println(err)
+					}
 					t.Fail()
 				}
 			})
 		}
 	}
+}
 
+func TestAuthorizeAdmin(t *testing.T) {
+	type testcase struct {
+		Name string
+		Sid  string
+		UID  uint32
+		URI  string
+		Suc  bool
+	}
+
+	testCases := []*testcase{
+		&testcase{"valid admin request from admin", "fake_session_id_for_1", uint32(1), "/admin", true},
+		&testcase{"valid normal request from admin", "fake_session_id_for_1", uint32(1), "/random", true},
+		&testcase{"invalid admin request from user", "fake_session_id", uint32(10), "/admin", false},
+		&testcase{"valid normal request from user", "fake_session_id", uint32(10), "/random", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.Name, func(t *testing.T) {
+			var (
+				req *http.Request
+				err error
+			)
+			req = httptest.NewRequest("GET", tc.URI, nil)
+			req, err = setByCookie(req, tc.UID, tc.Sid)
+			if err != nil {
+				t.Error(err)
+				t.Fail()
+				return
+			}
+			req, err = Authenticate(req)
+			pass := IsAuthenticated(req) && err == nil
+			if pass != tc.Suc {
+				t.Fail()
+			}
+		})
+	}
 }
 
 func setByCookie(req *http.Request, UID uint32, sid string) (*http.Request, error) {

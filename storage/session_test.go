@@ -39,7 +39,7 @@ func TestQuerySessionByUID(t *testing.T) {
 		pass bool
 	}{
 		{"valid query", 10, true},
-		{"no session", 1, false},
+		{"no session", 2, false},
 		{"invalid uid", 0, false},
 	}
 	for _, tc := range tcs {

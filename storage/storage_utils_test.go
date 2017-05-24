@@ -34,6 +34,7 @@ func seedTestDb() error {
 	insert into hlc_user(id, name, email, password, _slt) 
 		values (1, "Bob", "bob@example.com", "unsafe", "unsafe");
 		values (10, "ExAm", "example@gmail.com", "unsafe", "unsafe");
+		values (2, "alice", "alice@example.com", "unsafeA", "unsafe1ce");
 
 	insert into hlc_page(id, title, url)
 		values (1, "example", "http://example.com");
@@ -45,6 +46,7 @@ func seedTestDb() error {
 	insert into hlc_google_auth(google_id, uid) values ("example@gmail.com", 10);
 
 	insert into hlc_session(id, uid, last_access) values ("fake_session_id", 10, CURRENT_TIMESTAMP);
+	insert into hlc_session(id, uid, last_access) values ("fake_session_id_for_1", 1, CURRENT_TIMESTAMP);
 	`)
 	return err
 }

@@ -1,6 +1,4 @@
-
 /* HLC function tables */
-
 create table if not exists `hlc_user`(
   `id` integer primary key,
   `name` varchar(256) null,
@@ -43,12 +41,10 @@ create table if not exists `hlc_range`(
   `mtime` timestamp default current_timestamp
 );
 
-
 create table if not exists `hlc_comment`(
   `range` integer primary key,
   `comment`  TEXT
 );
-
 
 /**
  * Apr 11, 2017
@@ -72,3 +68,24 @@ create table if not exists `hlc_session`(
 );
 
 create unique index if not exists `idx_session_uid` on `hlc_google_auth` (`uid`);
+
+/** 
+ * May 23, 2017 
+
+create table if not exists `role`(
+  `id` integer primary key,
+  `user` integer, 
+  `role` integer,
+  `ctime` timestamp default current_timestamp
+);
+
+create unique index if not exists `idx_role_user_role` on `role` (`user, role`);
+
+create table if not exists `permission` (
+  `id` integer primary key,
+  `user` integer, 
+  `uri` varchar(256),
+  `ctime` timestamp default current_timestamp
+);
+
+ */

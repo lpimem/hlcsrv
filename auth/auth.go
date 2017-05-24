@@ -6,16 +6,18 @@ import (
 	"net/http"
 	"time"
 
+	"strings"
+
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/storage"
 )
 
-/*Authenticate always returns nil. It implements the interceptor
-interface.
-Authenticate add a flag to the request context to indicate if the request
-is authenticated.
-*/
+// Authenticate implements the interceptor interface.
+// It adds a flag to the request context to indicate if the
+// request is authenticated. If authenticated, it also checks
+// if the request is trying to access an admin URI and returns
+// error if the request is not from the admin user.
 func Authenticate(req *http.Request) (*http.Request, error) {
 	var (
 		uid uint32
@@ -31,20 +33,20 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 		log.Info("cannot extract uid/sid:", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
-		return req, nil
+		return req, authorizeAdmin(ctx, req)
 	}
 	if err = VerifySession(sid, uid, nil); err != nil {
 		log.Info("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
-		return req, nil
+		return req, authorizeAdmin(ctx, req)
 	}
-	ctx = context.WithValue(ctx, AUTHENTICATED, true)
 	ctx = context.WithValue(ctx, USER_ID, uid)
 	ctx = context.WithValue(ctx, SESSION_ID, sid)
+	ctx = context.WithValue(ctx, AUTHENTICATED, true)
 	req = req.WithContext(ctx)
 	log.Info("request from", uid, "is authorized.")
-	return req, nil
+	return req, authorizeAdmin(ctx, req)
 }
 
 // IsSessionTimeout returns if duration since lastAccess exceeds the max session lifetime
@@ -86,4 +88,26 @@ func IsAuthenticated(r *http.Request) bool {
 		return false
 	}
 	return v.(bool)
+}
+
+func authorizeAdmin(ctx context.Context, r *http.Request) error {
+	var err error
+	const admin string = "admin"
+	const adminUserID uint32 = 1
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) > 1 {
+		base := parts[1]
+		var arg string
+		if len(parts) > 2 {
+			arg = parts[2]
+		}
+		if base == admin || base == "static" && arg == admin {
+			uid := ctx.Value(USER_ID).(uint32)
+			if uid != adminUserID {
+				log.Warn("User [", uid, "] is unauthorized to access ", r.URL.Path)
+				err = errors.New("unauthorized")
+			}
+		}
+	}
+	return err
 }

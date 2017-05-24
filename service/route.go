@@ -32,10 +32,6 @@ func wrapProcessors(mux *http.ServeMux) *http.ServeMux {
 	wrapper.HandleFunc("/",
 		func(w http.ResponseWriter, r *http.Request) {
 			log.Info(r.Method, "\t", r.URL.String())
-			//ctx := r.Context()
-			//ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
-			//defer cancel()
-			//r = r.WithContext(ctx)
 			var correct bool
 			if r, correct = PreprocessRequest(w, r); !correct {
 				return
