@@ -102,7 +102,7 @@ func authorizeAdmin(ctx context.Context, r *http.Request) error {
 			arg = parts[2]
 		}
 		if base == admin || base == "static" && arg == admin {
-			uid := ctx.Value(USER_ID).(uint32)
+			uid := ctx.Value(USER_ID)
 			if uid != adminUserID {
 				log.Warn("User [", uid, "] is unauthorized to access ", r.URL.Path)
 				err = errors.New("unauthorized")

@@ -107,8 +107,17 @@ func TestAuthorizeAdmin(t *testing.T) {
 
 	testCases := []*testcase{
 		&testcase{"valid admin request from admin", "fake_session_id_for_1", uint32(1), "/admin", true},
-		&testcase{"valid normal request from admin", "fake_session_id_for_1", uint32(1), "/random", true},
+		&testcase{"valid admin request from admin", "fake_session_id_for_1", uint32(1), "/static/admin", true},
+		&testcase{"valid admin request from admin", "fake_session_id_for_1", uint32(1), "/static/admin/anything", true},
 		&testcase{"invalid admin request from user", "fake_session_id", uint32(10), "/admin", false},
+		&testcase{"invalid admin request from user", "fake_session_id", uint32(10), "/static/admin", false},
+		&testcase{"invalid admin request from user", "fake_session_id", uint32(10), "/static/admin/anything", false},
+		&testcase{"admin request from non-user", "", 0, "/admin", false},
+		&testcase{"admin request from non-user", "", 0, "/static/admin", false},
+		&testcase{"admin request from non-user", "", 0, "/static/admin/anything", false},
+		&testcase{"invalid admin request from user", "fake_session_id", uint32(10), "/admin", false},
+		&testcase{"admin request from non-user", "", 0, "/admin", false},
+		&testcase{"valid normal request from admin", "fake_session_id_for_1", uint32(1), "/random", true},
 		&testcase{"valid normal request from user", "fake_session_id", uint32(10), "/random", true},
 	}
 
