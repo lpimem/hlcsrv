@@ -2,9 +2,16 @@ package conf
 
 import "os"
 
+var debugFlag = false
+
 // IsDebug returns true should the app run in debugging mode.
 func IsDebug() bool {
-	return false
+	return debugFlag
+}
+
+// SetDebug change debug option
+func SetDebug(option bool) {
+	debugFlag = option
 }
 
 /*SessionSecret is the secret used to sign your cookies

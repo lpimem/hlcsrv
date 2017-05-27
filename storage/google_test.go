@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -136,7 +135,6 @@ func TestGetOrCreateUIDForGoogleUser(t *testing.T) {
 		Sub:   "100012",
 		Name:  "abc",
 	})
-	fmt.Println("expected msg for duplicated email:", err)
 	if err == nil {
 		t.Error("should raise error for duplicated email, got", uid, err)
 		t.Fail()

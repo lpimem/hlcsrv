@@ -40,7 +40,6 @@ func QueryDb(db *sql.DB, query string, args []interface{}, handler func(rowNo in
 	log.Debug(args...)
 	rows, err := db.Query(query, args...)
 	return IterateRows(rows, err, handler)
-
 }
 
 func QueryTx(tx *sql.DB, query string, args []interface{}, handler func(rowNo int, rows *sql.Rows) error) error {
@@ -59,7 +58,7 @@ func IterateRows(rows *sql.Rows, err error, handler func(rowNo int, rows *sql.Ro
 		if err != nil {
 			return err
 		}
-		current += 1
+		current++
 	}
 	if err = rows.Err(); err != nil {
 		return err

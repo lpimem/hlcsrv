@@ -89,3 +89,12 @@ create table if not exists `permission` (
 );
 
  */
+
+ create table if not exists `permission` (
+  `id` integer primary key,
+  `user` integer, 
+  `uri` varchar(256),
+  `ctime` timestamp default current_timestamp
+);
+
+create unique index `uidx_permission_user_uri` on `permission` (`user`, `uri`);

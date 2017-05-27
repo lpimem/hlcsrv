@@ -25,6 +25,7 @@ func cleanDb() error {
 	delete from hlc_comment;
 	delete from hlc_google_auth;
 	delete from hlc_session;
+	delete from permission;
 	`)
 	return err
 }
@@ -47,6 +48,11 @@ func seedTestDb() error {
 
 	insert into hlc_session(id, uid, last_access) values ("fake_session_id", 10, CURRENT_TIMESTAMP);
 	insert into hlc_session(id, uid, last_access) values ("fake_session_id_for_1", 1, CURRENT_TIMESTAMP);
+
+	insert into permission(user, uri) values (1, "/example/");
+	insert into permission(user, uri) values (1, "/example/A/");
+	insert into permission(user, uri) values (1, "/example/Boy/");
+	insert into permission(user, uri) values (2, "/example/Boy/");
 	`)
 	return err
 }
