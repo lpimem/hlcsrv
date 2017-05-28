@@ -11,7 +11,7 @@ import (
 // QuerySession checks if a session exists. If so, returns the last access time of the session, or error.
 func QuerySession(
 	sid string,
-	uid uint32,
+	uid UserID,
 ) (*time.Time, error) {
 	const query = "select last_access from hlc_session where id = ? and uid = ?"
 	var lastAccess time.Time
@@ -30,7 +30,7 @@ func QuerySession(
 
 // QuerySessionByUID check if a user has a session record
 func QuerySessionByUID(
-	uid uint32,
+	uid UserID,
 ) (*struct {
 	Sid        string
 	LastAccess *time.Time
@@ -57,7 +57,7 @@ func QuerySessionByUID(
 }
 
 // UpdateSession refreshes a session
-func UpdateSession(sid string, uid uint32) error {
+func UpdateSession(sid string, uid UserID) error {
 	if uid < 1 {
 		return errors.New("uid cannot be 0")
 	}

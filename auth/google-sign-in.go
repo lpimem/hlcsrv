@@ -38,7 +38,7 @@ func AuthenticateGoogleUser(ctx context.Context, rawToken string) (*SessionInfo,
 
 func updateGoogleUserSession(profile *storage.GoogleTokenClaim) (session *SessionInfo, err error) {
 	var (
-		uid        uint32
+		uid        storage.UserID
 		sid        string
 		lastAccess *time.Time
 	)
@@ -67,7 +67,7 @@ func updateGoogleUserSession(profile *storage.GoogleTokenClaim) (session *Sessio
 	return
 }
 
-func createSessionForGoogleUser(sub string, uid uint32) (sid string, err error) {
+func createSessionForGoogleUser(sub string, uid storage.UserID) (sid string, err error) {
 	sid = computeRandomSessionID(sub)
 	err = storage.UpdateSession(sid, uid)
 	return

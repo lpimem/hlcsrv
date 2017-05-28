@@ -199,7 +199,7 @@ func TestQueryPagenoteFuzzy(t *testing.T) {
 		// testcase name
 		Name string
 		// query user id
-		UID uint32
+		UID UserID
 		// query uri pattern
 		URI string
 		// expected result count

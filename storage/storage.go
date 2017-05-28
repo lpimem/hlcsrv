@@ -99,7 +99,7 @@ func SavePagenote(pn *hlcmsg.Pagenote) []error {
 }
 
 // QueryUserPagenoteByURI select pagenotes on similar URIs for user
-func QueryUserPagenoteByURI(uid uint32, uri string) (PagenoteDict, PagenoteAddon, error,
+func QueryUserPagenoteByURI(uid UserID, uri string) (PagenoteDict, PagenoteAddon, error,
 ) {
 	return storage.QueryPagenoteFuzzy(uid, uri)
 }

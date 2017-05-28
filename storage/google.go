@@ -21,8 +21,8 @@ type GoogleTokenClaim struct {
 }
 
 // GetOrCreateUIDForGoogleUser returns uid for a a given user's google id
-func GetOrCreateUIDForGoogleUser(profile *GoogleTokenClaim) (uint32, error) {
-	var uid uint32
+func GetOrCreateUIDForGoogleUser(profile *GoogleTokenClaim) (UserID, error) {
+	var uid UserID
 	var err error
 	uid = storage.QueryUIDByGoogleID(profile.Sub)
 	log.Debug("user id for google user ", profile.Sub, " not found, creating new")
@@ -40,17 +40,17 @@ func GetOrCreateUIDForGoogleUser(profile *GoogleTokenClaim) (uint32, error) {
 }
 
 // QueryUIDByGoogleID returns user id for a given google id
-func (s *SqliteStorage) QueryUIDByGoogleID(gid string) uint32 {
+func (s *SqliteStorage) QueryUIDByGoogleID(gid string) UserID {
 	const query = "select uid from hlc_google_auth where google_id=?"
 	var id uint64
 	util.QueryDb(s.DB, query, []interface{}{gid}, func(idx int, rows *sql.Rows) error {
 		return rows.Scan(&id)
 	})
-	return uint32(id)
+	return UserID(id)
 }
 
 // NewUserByGoogleProfile creates user with given google id
-func (s *SqliteStorage) NewUserByGoogleProfile(profile *GoogleTokenClaim) (newUserID uint32, err error) {
+func (s *SqliteStorage) NewUserByGoogleProfile(profile *GoogleTokenClaim) (newUserID UserID, err error) {
 	const query = `insert into hlc_user (name, email, password, _slt) values (?, ?, ?, ?);`
 	const query2 = `insert into hlc_google_auth(google_id, uid, picture) values (?, ?, ?);`
 	const passwdStrength = 32
@@ -69,7 +69,7 @@ func (s *SqliteStorage) NewUserByGoogleProfile(profile *GoogleTokenClaim) (newUs
 				return err
 			}
 			uid, err := r.LastInsertId()
-			newUserID = uint32(uid)
+			newUserID = UserID(uid)
 			return nil
 		},
 		func(tx *sql.Tx) error {

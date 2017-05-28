@@ -1,5 +1,9 @@
 package auth
 
+import (
+	"github.com/lpimem/hlcsrv/storage"
+)
+
 type context_key int
 
 const (
@@ -16,6 +20,6 @@ const (
 
 // SessionInfo defines authentication session info
 type SessionInfo struct {
-	Uid uint32 `json:"uid"`
-	Sid string `json:"token"`
+	Uid storage.UserID `json:"uid"`
+	Sid string         `json:"token"`
 }

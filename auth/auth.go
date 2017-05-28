@@ -14,7 +14,7 @@ import (
 )
 
 const admin string = "admin"
-const adminUserID uint32 = 1
+const adminUserID storage.UserID = 1
 
 // Authenticate implements the interceptor interface.
 // It adds a flag to the request context to indicate if the
@@ -23,7 +23,7 @@ const adminUserID uint32 = 1
 // error if the request is not from the admin user.
 func Authenticate(req *http.Request) (*http.Request, error) {
 	var (
-		uid uint32
+		uid storage.UserID
 		sid string
 		err error
 		ctx context.Context
@@ -60,7 +60,7 @@ func IsSessionTimeout(lastAccess time.Time) bool {
 
 // VerifySession verifies a session with claimed session id sid for user id uid, previously accessed
 // at lastAccess is still valid.
-func VerifySession(sid string, uid uint32, lastAccess *time.Time) error {
+func VerifySession(sid string, uid storage.UserID, lastAccess *time.Time) error {
 	var (
 		err error
 	)

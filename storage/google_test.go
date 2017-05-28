@@ -97,7 +97,7 @@ func TestSqliteStorage_NewUserByGoogleID(t *testing.T) {
 func TestGetOrCreateUIDForGoogleUser(t *testing.T) {
 	ResetTestDb()
 	var (
-		uid uint32
+		uid UserID
 		err error
 	)
 	uid, err = GetOrCreateUIDForGoogleUser(&GoogleTokenClaim{

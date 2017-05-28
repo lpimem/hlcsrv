@@ -50,7 +50,7 @@ type PagenoteAddon map[uint32][]interface{}
 
 // QueryPagenoteFuzzy queries notes for all URIs that match uriPattern
 func (s *SqliteStorage) QueryPagenoteFuzzy(
-	uid uint32, uriPattern string) (PagenoteDict, PagenoteAddon, error,
+	uid UserID, uriPattern string) (PagenoteDict, PagenoteAddon, error,
 ) {
 	var condBuilder bytes.Buffer
 	var parameters = []interface{}{}

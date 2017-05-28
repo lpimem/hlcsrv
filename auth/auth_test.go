@@ -37,7 +37,7 @@ func TestVerifySession(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := VerifySession(tc.sid, uint32(tc.UID), tc.la)
+			err := VerifySession(tc.sid, storage.UserID(uint32(tc.UID)), tc.la)
 			if (err == nil) != tc.pass {
 				t.Error("ERROR", err)
 				t.Fail()

@@ -9,7 +9,7 @@ func TestQuerySession(t *testing.T) {
 	type testcase struct {
 		Name string
 		Sid  string
-		Uid  uint32
+		UID  UserID
 		Pass bool
 	}
 	var tcs = []*testcase{
@@ -22,7 +22,7 @@ func TestQuerySession(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.Name, func(t *testing.T) {
-			lastAccess, err := QuerySession(tc.Sid, tc.Uid)
+			lastAccess, err := QuerySession(tc.Sid, tc.UID)
 			suc := lastAccess != nil && err == nil
 			if suc != tc.Pass {
 				fmt.Println(err)
@@ -44,7 +44,7 @@ func TestQuerySessionByUID(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			r, err := QuerySessionByUID(uint32(tc.uid))
+			r, err := QuerySessionByUID(UserID(tc.uid))
 			suc := r != nil && err == nil && r.LastAccess != nil && r.Sid != ""
 			if suc != tc.pass {
 				fmt.Println(err)
@@ -69,13 +69,13 @@ func TestUpdateSession(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			err := UpdateSession(tc.sid, uint32(tc.uid))
+			err := UpdateSession(tc.sid, UserID(tc.uid))
 			if (err == nil) != tc.pass {
 				fmt.Println(err)
 				t.Fail()
 				return
 			}
-			lastAccess, err := QuerySession(tc.sid, uint32(tc.uid))
+			lastAccess, err := QuerySession(tc.sid, UserID(tc.uid))
 			suc := lastAccess != nil && err == nil
 			if suc != tc.pass {
 				fmt.Println(err)
