@@ -59,8 +59,8 @@ func (*admin) RemoveRestriction(w http.ResponseWriter, req *http.Request) {
 	uri := req.Form.Get("uri")
 	err := storage.Restriction.Remove(uri)
 	if err != nil {
-		log.Errorf("Cannot add restriction: %s", err)
-		http.Error(w, "Cannot add restriction: "+err.Error(), http.StatusBadGateway)
+		log.Errorf("Cannot remove restriction: %s", err)
+		http.Error(w, "Cannot remove restriction: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 	w.WriteHeader(http.StatusOK)

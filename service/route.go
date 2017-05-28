@@ -15,15 +15,47 @@ func MakeRoutes() *http.ServeMux {
 
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/pagenote/delete", controller.DeletePagenote)
-	mux.HandleFunc("/pagenote/new", controller.SavePagenote)
-	mux.HandleFunc("/pagenote", controller.GetPagenote)
-	mux.HandleFunc("/google_auth", controller.AuthenticateGoogleUser)
-	mux.HandleFunc("/q", controller.HandleQuery)
+	// hlc
+	mux.HandleFunc("/pagenote/delete",
+		controller.DeletePagenote)
+
+	mux.HandleFunc("/pagenote/new",
+		controller.SavePagenote)
+
+	mux.HandleFunc("/pagenote",
+		controller.GetPagenote)
+
+	mux.HandleFunc("/google_auth",
+		controller.AuthenticateGoogleUser)
+
+	mux.HandleFunc("/q",
+		controller.HandleQuery)
+
+	// admin
+	mux.HandleFunc("/admin/users",
+		controller.Admin.Users)
+
+	mux.HandleFunc("/admin/permissions",
+		controller.Admin.Permissions)
+
+	mux.HandleFunc("/admin/restrictions",
+		controller.Admin.Restrictions)
+
+	mux.HandleFunc("/admin/restrict",
+		controller.Admin.AddRestriction)
+
+	mux.HandleFunc("/admin/unrestrict",
+		controller.Admin.RemoveRestriction)
+
+	// static files
 	fs := http.FileServer(
 		http.Dir("static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.Handle("/static/",
+		http.StripPrefix("/static/", fs))
+
+	// index
 	mux.HandleFunc("/", controller.Index)
+
 	return mux
 }
 
