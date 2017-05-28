@@ -35,7 +35,9 @@ func seedTestDb() error {
 	_, err := storage.DB.Exec(`
 	insert into hlc_user(id, name, email, password, _slt) 
 		values (1, "Bob", "bob@example.com", "unsafe", "unsafe");
+	insert into hlc_user(id, name, email, password, _slt) 
 		values (10, "ExAm", "example@gmail.com", "unsafe", "unsafe");
+	insert into hlc_user(id, name, email, password, _slt) 
 		values (2, "alice", "alice@example.com", "unsafeA", "unsafe1ce");
 
 	insert into hlc_page(id, title, url)

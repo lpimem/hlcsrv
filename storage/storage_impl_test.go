@@ -159,7 +159,7 @@ func TestQueryUser(t *testing.T) {
 func TestNewUser(t *testing.T) {
 	ResetTestDb()
 	uname := "Alice"
-	email := "alice@example.com"
+	email := "alice2@example.com"
 	passwd := "unsafe"
 	slt := "unsafe"
 	uid := storage.NewUser(uname, email, passwd, slt)

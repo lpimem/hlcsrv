@@ -26,6 +26,15 @@ func (r *restriction) Add(uri string) error {
 	return err
 }
 
+func (r *restriction) Remove(uri string) error {
+	var err error
+	if has, err := r.Has(uri); !has || err != nil {
+		return err
+	}
+	_, err = storage.DB.Exec("delete from `restriction` where uri = ?", uri)
+	return err
+}
+
 func (*restriction) Has(uri string) (result bool, err error) {
 	if uri, err = validatePermissionURI(uri); err != nil {
 		return true, err
@@ -36,6 +45,19 @@ func (*restriction) Has(uri string) (result bool, err error) {
 			return err
 		}
 		result = count > 0
+		return nil
+	})
+	return result, err
+}
+
+func (*restriction) All() (result []string, err error) {
+	result = make([]string, 0)
+	err = util.QueryDb(storage.DB, "select uri from `restriction`", nil, func(i int, r *sql.Rows) error {
+		var uri string
+		if err := r.Scan(&uri); err != nil {
+			return nil
+		}
+		result = append(result, uri)
 		return nil
 	})
 	return result, err
