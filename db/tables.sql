@@ -69,18 +69,6 @@ create table if not exists `hlc_session`(
 
 create unique index if not exists `idx_session_uid` on `hlc_google_auth` (`uid`);
 
-/** 
- * May 23, 2017 
-
-create table if not exists `role`(
-  `id` integer primary key,
-  `user` integer, 
-  `role` integer,
-  `ctime` timestamp default current_timestamp
-);
-
-create unique index if not exists `idx_role_user_role` on `role` (`user, role`);
-
 create table if not exists `permission` (
   `id` integer primary key,
   `user` integer, 
@@ -88,17 +76,7 @@ create table if not exists `permission` (
   `ctime` timestamp default current_timestamp
 );
 
- */
-
- create table if not exists `permission` (
-  `id` integer primary key,
-  `user` integer, 
-  `uri` varchar(256),
-  `ctime` timestamp default current_timestamp
-);
-
-create unique index `uidx_permission_user_uri` on `permission` (`user`, `uri`);
-
+create unique index if not exists `uidx_permission_user_uri` on `permission` (`user`, `uri`);
 
 create table if not exists `restriction` (
   `uri` varchar(256) primary key

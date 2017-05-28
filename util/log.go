@@ -11,6 +11,7 @@ func init() {
 	if conf.IsDebug() {
 		cLog := console.New()
 		log.RegisterHandler(cLog, log.AllLevels...)
+		return
 	}
 
 	sLog, err := syslog.New("", "", "hlcsrv", nil)
@@ -18,8 +19,5 @@ func init() {
 		panic(err)
 	}
 	levels := []log.Level{log.WarnLevel, log.ErrorLevel, log.AlertLevel, log.FatalLevel}
-	if conf.IsDebug() {
-		levels = append(levels, log.InfoLevel)
-	}
 	log.RegisterHandler(sLog, levels...)
 }

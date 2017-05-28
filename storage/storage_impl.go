@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"strings"
 
@@ -278,18 +277,12 @@ func initDb(db *sql.DB) error {
 }
 
 func prepareSQLDb(path string) (*sql.DB, error) {
-	var isNew = false
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		isNew = true
-	}
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
 	}
-	if isNew {
-		if err := initDb(db); err != nil {
-			return nil, err
-		}
+	if err := initDb(db); err != nil {
+		return nil, err
 	}
 	return db, nil
 }
