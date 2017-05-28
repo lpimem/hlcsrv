@@ -2,7 +2,7 @@ package conf
 
 import "os"
 
-var debugFlag = false
+var debugFlag = true
 
 // IsDebug returns true should the app run in debugging mode.
 func IsDebug() bool {

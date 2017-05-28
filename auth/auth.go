@@ -13,6 +13,9 @@ import (
 	"github.com/lpimem/hlcsrv/storage"
 )
 
+const admin string = "admin"
+const adminUserID uint32 = 1
+
 // Authenticate implements the interceptor interface.
 // It adds a flag to the request context to indicate if the
 // request is authenticated. If authenticated, it also checks
@@ -33,20 +36,20 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 		log.Info("cannot extract uid/sid:", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
-		return req, authorizeAdmin(ctx, req)
+		return req, authorize(ctx, req)
 	}
 	if err = VerifySession(sid, uid, nil); err != nil {
 		log.Info("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 		req = req.WithContext(ctx)
-		return req, authorizeAdmin(ctx, req)
+		return req, authorize(ctx, req)
 	}
 	ctx = context.WithValue(ctx, USER_ID, uid)
 	ctx = context.WithValue(ctx, SESSION_ID, sid)
 	ctx = context.WithValue(ctx, AUTHENTICATED, true)
 	req = req.WithContext(ctx)
 	log.Info("request from", uid, "is authorized.")
-	return req, authorizeAdmin(ctx, req)
+	return req, authorize(ctx, req)
 }
 
 // IsSessionTimeout returns if duration since lastAccess exceeds the max session lifetime
@@ -90,10 +93,36 @@ func IsAuthenticated(r *http.Request) bool {
 	return v.(bool)
 }
 
+func authorizeUser(ctx context.Context, r *http.Request) error {
+	uid := ctx.Value(USER_ID)
+	if uid == adminUserID {
+		return nil
+	}
+	uri := r.URL.Path
+	unauthorized := errors.New("unauthorized")
+	restricted, err := storage.Restriction.Has(uri)
+	if err != nil {
+		log.Errorf("authorizeUser: cannot query restriction: %s", err)
+		return errors.New("bad gateway")
+	}
+	if restricted {
+		if uid == nil {
+			return unauthorized
+		}
+		if acc, err := storage.Permission.HasAccess(uid.(uint32), uri); !acc {
+			if err != nil {
+				log.Errorf("error checking permission for user %d to %s : %s", uid, uri, err)
+			}
+			return unauthorized
+		}
+	} else {
+		log.Debugf("URI %s is not restricted")
+	}
+	return nil
+}
+
 func authorizeAdmin(ctx context.Context, r *http.Request) error {
 	var err error
-	const admin string = "admin"
-	const adminUserID uint32 = 1
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) > 1 {
 		base := parts[1]
@@ -104,10 +133,20 @@ func authorizeAdmin(ctx context.Context, r *http.Request) error {
 		if base == admin || base == "static" && arg == admin {
 			uid := ctx.Value(USER_ID)
 			if uid != adminUserID {
-				log.Warn("User [", uid, "] is unauthorized to access ", r.URL.Path)
+				log.Warn("User [", uid, "] is unauthorized to access admin URI ", r.URL.Path)
 				err = errors.New("unauthorized")
 			}
 		}
 	}
 	return err
+}
+
+func authorize(ctx context.Context, r *http.Request) error {
+	if err := authorizeAdmin(ctx, r); err != nil {
+		return err
+	}
+	if err := authorizeUser(ctx, r); err != nil {
+		return err
+	}
+	return nil
 }

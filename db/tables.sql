@@ -98,3 +98,8 @@ create table if not exists `permission` (
 );
 
 create unique index `uidx_permission_user_uri` on `permission` (`user`, `uri`);
+
+
+create table if not exists `restriction` (
+  `uri` varchar(256) primary key
+);

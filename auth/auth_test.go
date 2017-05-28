@@ -1,13 +1,13 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/storage"
 )
@@ -39,7 +39,7 @@ func TestVerifySession(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			err := VerifySession(tc.sid, uint32(tc.UID), tc.la)
 			if (err == nil) != tc.pass {
-				fmt.Println("ERROR", err)
+				t.Error("ERROR", err)
 				t.Fail()
 			}
 		})
@@ -82,12 +82,12 @@ func TestAuthenticate(t *testing.T) {
 				}
 				req, err = Authenticate(req)
 				if IsAuthenticated(req) != tc.Suc {
-					fmt.Println(req.Context().Value(AUTHENTICATED))
-					fmt.Println(req.Context().Value(USER_ID))
-					fmt.Println(req.Context().Value(SESSION_ID))
-					fmt.Println(req.Context().Value(REASON))
+					log.Debug(req.Context().Value(AUTHENTICATED))
+					log.Debug(req.Context().Value(USER_ID))
+					log.Debug(req.Context().Value(SESSION_ID))
+					log.Debug(req.Context().Value(REASON))
 					if err != nil {
-						fmt.Println(err)
+						t.Error(err)
 					}
 					t.Fail()
 				}
@@ -137,6 +137,9 @@ func TestAuthorizeAdmin(t *testing.T) {
 			req, err = Authenticate(req)
 			pass := IsAuthenticated(req) && err == nil
 			if pass != tc.Suc {
+				if err != nil {
+					t.Error("unexpected error :", err)
+				}
 				t.Fail()
 			}
 		})
@@ -149,7 +152,7 @@ func setByCookie(req *http.Request, UID uint32, sid string) (*http.Request, erro
 			Name:  conf.SessionKeySID(),
 			Value: sid,
 		})
-		fmt.Println("req add cookie:", conf.SessionKeySID(), sid)
+		log.Info("req add cookie:", conf.SessionKeySID(), sid)
 		if _, err := req.Cookie(conf.SessionKeySID()); err != nil {
 			return nil, err
 		}
@@ -159,7 +162,7 @@ func setByCookie(req *http.Request, UID uint32, sid string) (*http.Request, erro
 			Name:  conf.SessionKeyUser(),
 			Value: strconv.FormatUint(uint64(UID), 10),
 		})
-		fmt.Println("req add cookie:", conf.SessionKeyUser(), UID)
+		log.Info("req add cookie:", conf.SessionKeyUser(), UID)
 	}
 	return req, nil
 }

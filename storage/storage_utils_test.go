@@ -26,6 +26,7 @@ func cleanDb() error {
 	delete from hlc_google_auth;
 	delete from hlc_session;
 	delete from permission;
+	delete from restriction;
 	`)
 	return err
 }
@@ -53,6 +54,8 @@ func seedTestDb() error {
 	insert into permission(user, uri) values (1, "/example/A/");
 	insert into permission(user, uri) values (1, "/example/Boy/");
 	insert into permission(user, uri) values (2, "/example/Boy/");
+
+	insert into restriction(uri) values ("/example/");
 	`)
 	return err
 }
