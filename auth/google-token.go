@@ -80,6 +80,10 @@ func init() {
 	log.Info("google client id:", clientID)
 	log.Info("google client secret:", len(clientSecret))
 	if err := configure(context.Background()); err != nil {
+		if conf.IsDebug() {
+			log.Errorf("cannot set up google app config : %s", err)
+			return
+		}
 		panic(err)
 	}
 }

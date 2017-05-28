@@ -109,7 +109,7 @@ func authorizeUser(ctx context.Context, r *http.Request) error {
 		if uid == nil {
 			return unauthorized
 		}
-		if acc, err := storage.Permission.HasAccess(uid.(uint32), uri); !acc {
+		if acc, err := storage.Permission.HasAccess(uid.(storage.UserID), uri); !acc {
 			if err != nil {
 				log.Errorf("error checking permission for user %d to %s : %s", uid, uri, err)
 			}

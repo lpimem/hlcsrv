@@ -2,9 +2,13 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-playground/log"
+	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/storage"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type admin struct{}
@@ -64,7 +68,25 @@ func (*admin) RemoveRestriction(w http.ResponseWriter, req *http.Request) {
 
 // List users
 func (*admin) Users(w http.ResponseWriter, req *http.Request) {
-
+	if !requireAuth(w, req) {
+		return
+	}
+	var (
+		resp []byte
+		err  error
+	)
+	users, err := storage.User.All(100, 0)
+	if err != nil {
+		log.Errorf("Error querying users %s", err)
+		http.Error(w, "Server error", http.StatusBadGateway)
+		return
+	}
+	if resp, err = json.Marshal(users); err != nil {
+		log.Errorf("Error JSON-encoding users %s", err)
+		http.Error(w, "Server error", http.StatusBadGateway)
+		return
+	}
+	w.Write(resp)
 }
 
 // List permissions
@@ -80,6 +102,40 @@ func (*admin) Grant(w http.ResponseWriter, req *http.Request) {
 	if !requireAuth(w, req) || !requirePost(w, req) {
 		return
 	}
+	uid := req.PostFormValue("uid")
+	uri := req.PostFormValue("uri")
+	log.Debugf("Req body: %s", req.PostForm.Encode())
+	log.Debugf("Grant: %s -> %s", uid, uri)
+	for _, v := range []string{uid, uri} {
+		if strings.TrimSpace(v) == "" {
+			http.Error(w, "Missing required parameter", http.StatusBadRequest)
+			return
+		}
+	}
+	var (
+		user  storage.UserID
+		uid64 uint64
+		err   error
+	)
+	if uid64, err = strconv.ParseUint(uid, 10, 32); err != nil {
+		var msg string
+		var debugMsg = fmt.Sprintf("Cannot parse user id from %s : %s", uid, err)
+		if conf.IsDebug() {
+			msg = debugMsg
+		} else {
+			msg = "Invalid parameter"
+		}
+		log.Debug(debugMsg)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	user = (storage.UserID)(uid64)
+	if err := storage.Permission.Grant(user, uri); err != nil {
+		log.Errorf("Error granting permission for %d to %s: %s", user, uri, err)
+		http.Error(w, "server error", http.StatusBadGateway)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // revoke all access from user

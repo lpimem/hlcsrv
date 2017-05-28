@@ -9,7 +9,7 @@ func TestHasAccess(t *testing.T) {
 	ResetTestDb()
 	type testcase struct {
 		Name string
-		User uint32
+		User UserID
 		URI  string
 		Suc  bool
 	}
@@ -41,7 +41,7 @@ func TestGrant(t *testing.T) {
 	ResetTestDb()
 	type testcase struct {
 		Name       string
-		User       uint32
+		User       UserID
 		URI        string
 		TestURIPos []string
 		TestURINeg []string

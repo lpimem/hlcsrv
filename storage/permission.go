@@ -15,7 +15,7 @@ type permission struct {
 // Permission is singleton to perform permission queries.
 var Permission permission
 
-func (*permission) ForUser(uid uint32) ([]string, error) {
+func (*permission) ForUser(uid UserID) ([]string, error) {
 	uris := []string{}
 	err := util.QueryDb(storage.DB,
 		"select uri from permission where user=?",
@@ -29,8 +29,8 @@ func (*permission) ForUser(uid uint32) ([]string, error) {
 	return uris, err
 }
 
-func (*permission) ToURI(uri string) ([]uint32, error) {
-	users := []uint32{}
+func (*permission) ToURI(uri string) ([]UserID, error) {
+	users := []UserID{}
 	var err error
 	uri, err = validatePermissionURI(uri)
 	if err != nil {
@@ -40,7 +40,7 @@ func (*permission) ToURI(uri string) ([]uint32, error) {
 		"select user from permission where uri=?",
 		[]interface{}{uri},
 		func(rowNo int, rows *sql.Rows) error {
-			var uid uint32
+			var uid UserID
 			if err := rows.Scan(&uid); err != nil {
 				return err
 			}
@@ -66,7 +66,7 @@ func validatePermissionURI(uri string) (string, error) {
 	return uri, err
 }
 
-func (p *permission) Grant(uid uint32, uri string) error {
+func (p *permission) Grant(uid UserID, uri string) error {
 	var err error
 	uri, err = validatePermissionURI(uri)
 	if err != nil {
@@ -82,7 +82,7 @@ func (p *permission) Grant(uid uint32, uri string) error {
 	return err
 }
 
-func (*permission) Revoke(uid uint32, uri string) error {
+func (*permission) Revoke(uid UserID, uri string) error {
 	// var err error
 	// uri, err = validatePermissionURI(uri)
 	// if err != nil {
@@ -95,7 +95,7 @@ func (*permission) Revoke(uid uint32, uri string) error {
 // HasAccess returns true if there is at least one record in permission table of which
 // the uri values is a prefix of the parameter uri for user with uid
 // Note: this function should only be used for non-administrator roles.
-func (*permission) HasAccess(uid uint32, uri string) (bool, error) {
+func (*permission) HasAccess(uid UserID, uri string) (bool, error) {
 	var err error
 	if "/" == uri {
 		return false, err
@@ -123,7 +123,7 @@ func (*permission) HasAccess(uid uint32, uri string) (bool, error) {
 	return result, err
 }
 
-func buildHasAccessQuery(uid uint32, uri string) (query string, values []interface{}) {
+func buildHasAccessQuery(uid UserID, uri string) (query string, values []interface{}) {
 	query = "select count(*) from permission where user = ? and instr(?, uri)"
 	values = []interface{}{uid, uri}
 	return query, values

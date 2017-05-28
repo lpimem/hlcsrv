@@ -226,6 +226,14 @@ func fakeAuthenticateion(r *http.Request) *http.Request {
 	return r.WithContext(ctx)
 }
 
+func fakeAdminAuthenticateion(r *http.Request) *http.Request {
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, auth.AUTHENTICATED, true)
+	ctx = context.WithValue(ctx, auth.USER_ID, 1)
+	ctx = context.WithValue(ctx, auth.SESSION_ID, "fake_session_id_for_1")
+	return r.WithContext(ctx)
+}
+
 func init() {
 	storage.ResetTestDb()
 }
