@@ -18,11 +18,11 @@ func extractUIDSid(req *http.Request) (uid storage.UserID, sid string, err error
 		uid, sid, err2 = extractUIDSidFromRequestHeader(req)
 		if err2 != nil {
 			err = errors.New(err.Error() + " & " + err2.Error())
-			return
+		} else {
+			err = nil
 		}
-		err = nil
 	}
-	return
+	return uid, sid, err
 }
 
 func extractUIDSidFromCookies(req *http.Request) (uid storage.UserID, sid string, err error) {

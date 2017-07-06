@@ -10,6 +10,7 @@ import (
 	"github.com/lpimem/hlcsrv/auth"
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/hlccookie"
+	"github.com/lpimem/hlcsrv/storage"
 )
 
 // Index renders the default page of the website.
@@ -52,6 +53,22 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 	}
 	hlccookie.SetAuthCookies(w, sessionInfo.Sid, sessionInfo.Uid)
 	_, err = w.Write(respJSON)
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+// Logout handles the logout request by removing the session.
+func Logout(w http.ResponseWriter, req *http.Request) {
+	if !requirePost(w, req) {
+		return
+	}
+	if !requireAuth(w, req) {
+		log.Warn("Not authorized...")
+		return
+	}
+	sid := req.Context().Value(auth.SESSION_ID).(string)
+	err := storage.DeleteSession(sid)
 	if err != nil {
 		log.Error(err)
 	}

@@ -75,3 +75,9 @@ func UpdateSession(sid string, uid UserID) error {
 		[]interface{}{sid})
 	return err
 }
+
+// DeleteSession removes session with the given id.
+func DeleteSession(sid string) error {
+	_, err := storage.DB.Exec("delete from hlc_session where id = ?", sid)
+	return err
+}

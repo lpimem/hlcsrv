@@ -28,6 +28,9 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/google_auth",
 		controller.AuthenticateGoogleUser)
 
+	mux.HandleFunc("/logout",
+		controller.Logout)
+
 	mux.HandleFunc("/q",
 		controller.HandleQuery)
 
