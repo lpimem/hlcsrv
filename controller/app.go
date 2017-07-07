@@ -61,10 +61,11 @@ func AuthenticateGoogleUser(w http.ResponseWriter, req *http.Request) {
 // Logout handles the logout request by removing the session.
 func Logout(w http.ResponseWriter, req *http.Request) {
 	if !requirePost(w, req) {
+		log.Warn("Logout request should use POST method")
 		return
 	}
 	if !requireAuth(w, req) {
-		log.Warn("Not authorized...")
+		log.Warn("Logout request should be authenticated")
 		return
 	}
 	sid := req.Context().Value(auth.SESSION_ID).(string)

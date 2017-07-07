@@ -20,6 +20,9 @@ import (
 
 const URLNewPagenote = "/pagenote/new"
 
+const fakeUID = 10
+const fakeSID = "fake_session_id"
+
 func TestNewPagenotePostOnly(t *testing.T) {
 	// post only
 	var w *httptest.ResponseRecorder
@@ -218,11 +221,41 @@ func TestFakeAuthentication(t *testing.T) {
 	}
 }
 
+func TestLogout(t *testing.T) {
+	r := httptest.NewRequest("POST", "/logout", nil)
+	fakeAuthenticateion(r)
+	if !auth.IsAuthenticated(r) {
+		t.Error("faked session not working")
+		t.FailNow()
+	}
+	resp := httptest.NewRecorder()
+	Logout(resp, r)
+	if resp.Code != http.StatusOK {
+		t.Errorf("response code is not OK: %d", resp.Code)
+		t.Fail()
+	}
+
+	lastAccess, err := storage.QuerySession(fakeSID, fakeUID)
+	if err != nil {
+		t.Error("cannot query user session after logout: ", err)
+		t.Fail()
+	}
+	if lastAccess != nil {
+		t.Error("session still exists after logout: ", lastAccess)
+		t.Fail()
+	}
+	if auth.IsAuthenticated(r) {
+		t.Error("Logout failed: request is still authenticated")
+		t.Fail()
+	}
+}
+
 func fakeAuthenticateion(r *http.Request) *http.Request {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, auth.AUTHENTICATED, true)
-	ctx = context.WithValue(ctx, auth.USER_ID, 10)
-	ctx = context.WithValue(ctx, auth.SESSION_ID, "fake_session_id")
+	ctx = context.WithValue(ctx, auth.USER_ID, fakeUID)
+	ctx = context.WithValue(ctx, auth.SESSION_ID, fakeSID)
+	storage.UpdateSession(fakeSID, fakeUID)
 	return r.WithContext(ctx)
 }
 
