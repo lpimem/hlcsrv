@@ -48,7 +48,7 @@ func SessionKeySID() string {
 /*SessionValidHours defines how long a session could be idle for.
  */
 func SessionValidHours() float64 {
-	return 24 * 3
+	return 24 * 30
 }
 
 /*GoogleSignInAppID extract google client id from $GOOGLE_OAUTH2_CLIENT_ID
