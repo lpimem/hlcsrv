@@ -21,12 +21,16 @@ TEST_RESULT=$TESTDIR/test_result
 
 ./test_setup.sh 1
 
+suc=0
+
 for d in */ ; do
   tc=${d%/}
   pushd $tc > /dev/null
   go test $OPTION --ldflags -s -o $TESTDIR/$tc.test ../$tc > $TEST_RESULT 2>&1
   ret=$?
-  suc=0
+  if [ $ret != 0 ] ; then
+      suc=$ret
+  fi 
   popd > /dev/null
 
   input="$TEST_RESULT"
@@ -37,6 +41,7 @@ for d in */ ; do
         if [[ $msg == *"---"* ]]; then
           if [[ $msg != *"--- PASS"* ]]; then
             color=$RED
+            suc=1
           else 
             color="${RESET}$GREY$GREEN"
           fi
