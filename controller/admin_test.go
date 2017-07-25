@@ -13,8 +13,12 @@ import (
 
 func TestAdminUsers(t *testing.T) {
 	var w *httptest.ResponseRecorder
+	var err error
 	get := httptest.NewRequest("GET", "/admin/users", nil)
-	get = fakeAuthenticateion(get)
+	if get, err = fakeAuthenticateion(get); err != nil {
+		t.Error("cannot fake auth", err)
+		return
+	}
 	w = httptest.NewRecorder()
 	Admin.Users(w, get)
 	if w.Code != http.StatusOK {

@@ -26,8 +26,12 @@ const fakeSID = "fake_session_id"
 func TestNewPagenotePostOnly(t *testing.T) {
 	// post only
 	var w *httptest.ResponseRecorder
+	var err error
 	get := httptest.NewRequest("GET", URLNewPagenote, nil)
-	get = fakeAuthenticateion(get)
+	if get, err = fakeAuthenticateion(get); err != nil {
+		t.Error("cannot fake auth", err)
+		return
+	}
 	w = httptest.NewRecorder()
 	SavePagenote(w, get)
 	if w.Code != http.StatusBadRequest {
@@ -41,8 +45,12 @@ func TestNewPagenoteNoEmptyReq(t *testing.T) {
 
 	// post empty
 	var post *http.Request
+	var err error
 	post = httptest.NewRequest("POST", URLNewPagenote, nil)
-	post = fakeAuthenticateion(post)
+	if post, err = fakeAuthenticateion(post); err != nil {
+		t.Error("cannot fake auth", err)
+		return
+	}
 	w = httptest.NewRecorder()
 	SavePagenote(w, post)
 	if w.Code == http.StatusOK {
@@ -52,12 +60,18 @@ func TestNewPagenoteNoEmptyReq(t *testing.T) {
 }
 
 func TestNewPagenoteNormal(t *testing.T) {
-	var w *httptest.ResponseRecorder
+	var (
+		w   *httptest.ResponseRecorder
+		err error
+	)
 	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
 	buf, _ := proto.Marshal(reqPn)
 	reader := bytes.NewReader(buf)
 	post := httptest.NewRequest("POST", URLNewPagenote, reader)
-	post = fakeAuthenticateion(post)
+	if post, err = fakeAuthenticateion(post); err != nil {
+		t.Error("cannot fake auth", err)
+		return
+	}
 	w = httptest.NewRecorder()
 	SavePagenote(w, post)
 	if w.Code != http.StatusOK {
@@ -65,7 +79,6 @@ func TestNewPagenoteNormal(t *testing.T) {
 		t.Fail()
 		return
 	}
-	var err error
 	log.Trace("encoded resp body:", w.Body.String())
 	decoder := base64.NewDecoder(base64.StdEncoding, w.Body)
 	respBody, err := ioutil.ReadAll(decoder)
@@ -100,34 +113,46 @@ func TestNewPagenoteNormal(t *testing.T) {
 }
 
 func BenchmarkSavePagenote(b *testing.B) {
-	var w *httptest.ResponseRecorder
+	var (
+		w   *httptest.ResponseRecorder
+		err error
+	)
 	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
 	buf, _ := proto.Marshal(reqPn)
 	//requests := []*http.Request{}
 	//for n := 0; n < b.N; n++ {
 	//	reader := bytes.NewReader(buf)
 	//	post := httptest.NewRequest("POST", URLNewPagenote, reader)
-	//	post = fakeAuthenticateion(post)
+	//	post, _ = fakeAuthenticateion(post)
 	//	requests = append(requests, post)
 	//}
 	for n := 0; n < b.N; n++ {
 		reader := bytes.NewReader(buf)
 		post := httptest.NewRequest("POST", URLNewPagenote, reader)
-		post = fakeAuthenticateion(post)
+		if post, err = fakeAuthenticateion(post); err != nil {
+			b.Error("cannot fake auth", err)
+			return
+		}
 		w = httptest.NewRecorder()
 		SavePagenote(w, post)
 	}
 }
 
 func BenchmarkSavePagenoteP(b *testing.B) {
-	var w *httptest.ResponseRecorder
+	var (
+		w   *httptest.ResponseRecorder
+		err error
+	)
 	reqPn := mockPageNote(1, 1, "http://example.com/index.html")
 	buf, _ := proto.Marshal(reqPn)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			reader := bytes.NewReader(buf)
 			post := httptest.NewRequest("POST", URLNewPagenote, reader)
-			post = fakeAuthenticateion(post)
+			if post, err = fakeAuthenticateion(post); err != nil {
+				b.Error("cannot fake auth", err)
+				return
+			}
 			w = httptest.NewRecorder()
 			SavePagenote(w, post)
 		}
@@ -135,8 +160,12 @@ func BenchmarkSavePagenoteP(b *testing.B) {
 }
 
 func BenchmarkGetPagenote(b *testing.B) {
+	var err error
 	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
-	req = fakeAuthenticateion(req)
+	if req, err = fakeAuthenticateion(req); err != nil {
+		b.Error("cannot fake auth", err)
+		return
+	}
 	tcs := []int{10, 100, 1000}
 	for _, tc := range tcs {
 		storage.ResetTestDb()
@@ -153,8 +182,12 @@ func BenchmarkGetPagenote(b *testing.B) {
 func BenchmarkGetPagenoteP(b *testing.B) {
 	storage.ResetTestDb()
 	storage.SeedDbForBench(100)
+	var err error
 	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
-	req = fakeAuthenticateion(req)
+	if req, err = fakeAuthenticateion(req); err != nil {
+		b.Error("cannot fake auth", err)
+		return
+	}
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			recorder := httptest.NewRecorder()
@@ -164,8 +197,12 @@ func BenchmarkGetPagenoteP(b *testing.B) {
 }
 
 func TestGetPageNote(t *testing.T) {
+	var err error
 	req := httptest.NewRequest("GET", "/pagenote?uid=1&url=example.com", nil)
-	req = fakeAuthenticateion(req)
+	if req, err = fakeAuthenticateion(req); err != nil {
+		t.Error("cannot fake auth", err)
+		return
+	}
 	recorder := httptest.NewRecorder()
 	GetPagenote(recorder, req)
 	httpResp := recorder.Result()
@@ -213,8 +250,12 @@ func TestGetPageNote(t *testing.T) {
 }
 
 func TestFakeAuthentication(t *testing.T) {
+	var err error
 	r := httptest.NewRequest("GET", "/", nil)
-	r = fakeAuthenticateion(r)
+	if r, err = fakeAuthenticateion(r); err != nil {
+		t.Error("cannot fake auth", err)
+		return
+	}
 	if !auth.IsAuthenticated(r) {
 		t.Error("fakeAuthenticateion should mark request authenticated.")
 		t.Fail()
@@ -222,8 +263,12 @@ func TestFakeAuthentication(t *testing.T) {
 }
 
 func TestLogout(t *testing.T) {
+	var err error
 	r := httptest.NewRequest("POST", "/logout", nil)
-	fakeAuthenticateion(r)
+	if r, err = fakeAuthenticateion(r); err != nil {
+		t.Error(err)
+		return
+	}
 	if !auth.IsAuthenticated(r) {
 		t.Error("faked session not working")
 		t.FailNow()
@@ -244,19 +289,23 @@ func TestLogout(t *testing.T) {
 		t.Error("session still exists after logout: ", lastAccess)
 		t.Fail()
 	}
+	if r, err = auth.Authenticate(r); err != nil {
+		t.Error("Authenticate error", err)
+		t.Fail()
+	}
 	if auth.IsAuthenticated(r) {
 		t.Error("Logout failed: request is still authenticated")
 		t.Fail()
 	}
 }
 
-func fakeAuthenticateion(r *http.Request) *http.Request {
+func fakeAuthenticateion(r *http.Request) (*http.Request, error) {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, auth.AUTHENTICATED, true)
 	ctx = context.WithValue(ctx, auth.USER_ID, fakeUID)
 	ctx = context.WithValue(ctx, auth.SESSION_ID, fakeSID)
-	storage.UpdateSession(fakeSID, fakeUID)
-	return r.WithContext(ctx)
+	err := storage.UpdateSession(fakeSID, fakeUID)
+	return r.WithContext(ctx), err
 }
 
 func fakeAdminAuthenticateion(r *http.Request) *http.Request {
