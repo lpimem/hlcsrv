@@ -28,9 +28,9 @@ for d in */ ; do
   pushd $tc > /dev/null
   go test $OPTION --ldflags -s -o $TESTDIR/$tc.test ../$tc > $TEST_RESULT 2>&1
   ret=$?
-  if [ $ret != 0 ] ; then
-      suc=$ret
-  fi 
+  # if [ $ret != 0 ] ; then
+  #     suc=$ret
+  # fi 
   popd > /dev/null
 
   input="$TEST_RESULT"
