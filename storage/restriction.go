@@ -36,6 +36,9 @@ func (r *restriction) Remove(uri string) error {
 }
 
 func (*restriction) Has(uri string) (result bool, err error) {
+	if len(uri) == 0 || uri == "/" {
+		return true, nil
+	}
 	if uri, err = validatePermissionURI(uri); err != nil {
 		return true, err
 	}
