@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -19,11 +18,6 @@ import (
 
 var (
 	qTemplate *template.Template
-)
-
-const (
-	errorPolicyReturn = iota
-	errorPolicyPanic
 )
 
 type queryStatus struct {
@@ -121,26 +115,6 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 	s.Count = count
 	log.Debug(count, " records found for ", q)
 	return s
-}
-
-func loadTemplate(name, path string, errorPolicy int32) (*template.Template, error) {
-	log.Debug("loading template [", name, "] from ", path)
-	templateStr, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Error("error loading tempalte", err)
-		if errorPolicy == errorPolicyPanic {
-			panic(err)
-		}
-		return nil, err
-	}
-	t, err := template.New(name).Parse(string(templateStr))
-	if err != nil {
-		log.Error("error loading tempalte", err)
-		if errorPolicy == errorPolicyPanic {
-			panic(err)
-		}
-	}
-	return t, err
 }
 
 func loadQTemplate() (err error) {

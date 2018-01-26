@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="encoding" value="utf-8" />
+    <title> {{.Title}} </title>
+    <link rel="stylesheet" type="text/css" href="../static/base.css" />
+
+    {{if .Styles}}
+        {{range .Styles}}
+            <link rel="stylesheet" type="text/css" href="../static/{{.}}" />
+        {{end}}
+    {{end}}
+
+</head>
+
+<body>
+
+<div id="layout">
+    <div class="reading">
+    
+    </div>
+
+    <div class="books">
+        <div class="search-bar"> 
+        <form action="search">
+            <input type="text" />
+            <input type="button" value="Search" />
+        </form>
+        </div>
+        <div class="result">
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

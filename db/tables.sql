@@ -81,3 +81,26 @@ create unique index if not exists `uidx_permission_user_uri` on `permission` (`u
 create table if not exists `restriction` (
   `uri` varchar(256) primary key
 );
+
+/**
+ * Sep 17, 2017
+ **/ 
+
+create table if not exists `book`(
+  `id` integer primary key,
+  `title` varchar(1024),
+  `base_path` varchar(1024), 
+  `page_count` integer, 
+  `toc_page` varchar(256),
+  `ctime` timestamp default current_timestampd
+);
+
+create table if not exists `reading` (
+  `uid` integer,
+  `bid` integer,           
+  `progress` integer,      /* page counts the user has read */ 
+  `page_uri` varchar(256), /* URI to the page which the user is reading */ 
+  `display` integer default 1, 
+  `ctime` timestamp default current_timestamp,
+  `mtime` timestamp default current_timestamp
+);
