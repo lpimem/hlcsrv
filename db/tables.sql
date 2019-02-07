@@ -10,7 +10,7 @@ create table if not exists `hlc_user`(
   `mtime` timestamp default current_timestamp
 );
 
-create unique index if not exists `idx_user_name` on `hlc_user` (`name`);
+create index if not exists `idx_user_name` on `hlc_user` (`name`);
 create unique index if not exists `idx_user_email` on `hlc_user` (`email`);
 
 create table if not exists `hlc_page`(
