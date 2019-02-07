@@ -116,7 +116,7 @@ func authorizeUser(ctx context.Context, r *http.Request) error {
 			return unauthorized
 		}
 	} else {
-		log.Debugf("URI %s is not restricted")
+		log.Debugf("URI %s is not restricted", uri)
 	}
 	return nil
 }

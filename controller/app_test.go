@@ -79,7 +79,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 		t.Fail()
 		return
 	}
-	log.Trace("encoded resp body:", w.Body.String())
+	defer log.WithTrace().Info("encoded resp body:", w.Body.String())
 	decoder := base64.NewDecoder(base64.StdEncoding, w.Body)
 	respBody, err := ioutil.ReadAll(decoder)
 	if err != nil {
@@ -87,7 +87,7 @@ func TestNewPagenoteNormal(t *testing.T) {
 		t.Fail()
 		return
 	}
-	log.Trace("base64 decoded body:", respBody)
+	defer log.WithTrace().Info("base64 decoded body:", respBody)
 	pnResp := &hlcmsg.HlcResp{}
 	err = proto.Unmarshal(respBody, pnResp)
 	if err != nil {

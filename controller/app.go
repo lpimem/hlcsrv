@@ -93,7 +93,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 // See also:
 //   1. hlc_resp.proto https://github.com/lpimem/hlcproto/blob/e7787d65aea33d1eb97b3f1f208394ee6a59f187/hlc_resp.proto
 func GetPagenote(w http.ResponseWriter, req *http.Request) {
-	defer log.Trace("GetPagenote...")
+	defer  log.WithTrace().Info("GetPagenote...")
 	if !requireAuth(w, req) {
 		log.Warn("Not authorized...")
 		return
@@ -119,7 +119,7 @@ func GetPagenote(w http.ResponseWriter, req *http.Request) {
 // Response:
 //   Serialized @hlcmsg.HlcResp message encoded in base64.
 func SavePagenote(w http.ResponseWriter, req *http.Request) {
-	defer log.Trace("SavePagenote...")
+	defer  log.WithTrace().Info("SavePagenote...")
 	if !requirePost(w, req) {
 		return
 	}
@@ -147,7 +147,7 @@ func SavePagenote(w http.ResponseWriter, req *http.Request) {
 
 // DeletePagenote handles the post request to delete an array of notes.
 func DeletePagenote(w http.ResponseWriter, req *http.Request) {
-	defer log.Trace("DeletePagenote...")
+	defer  log.WithTrace().Info("DeletePagenote...")
 	if !requirePost(w, req) {
 		return
 	}

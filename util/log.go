@@ -9,15 +9,17 @@ import (
 
 func init() {
 	if conf.IsDebug() {
-		cLog := console.New()
-		log.RegisterHandler(cLog, log.AllLevels...)
+		cLog := console.New(true)
+		log.AddHandler(cLog, log.AllLevels...)
 		return
 	}
 
 	sLog, err := syslog.New("", "", "hlcsrv", nil)
 	if err != nil {
-		panic(err)
+		log.Warn(err)
+	} else {
+		levels := []log.Level{log.WarnLevel, log.ErrorLevel, log.AlertLevel, log.FatalLevel}
+		log.AddHandler(sLog, levels...)
 	}
-	levels := []log.Level{log.WarnLevel, log.ErrorLevel, log.AlertLevel, log.FatalLevel}
-	log.RegisterHandler(sLog, levels...)
+
 }

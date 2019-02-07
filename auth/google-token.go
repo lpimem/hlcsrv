@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/conf"
 	"golang.org/x/net/context"
+	// "golang.org/x/oauth2"
 )
 
 var (
@@ -53,7 +54,6 @@ func configure(ctx context.Context) error {
 	}
 	oidcConfig := &oidc.Config{
 		ClientID:       clientID,
-		SkipNonceCheck: true,
 	}
 	verifier = provider.Verifier(oidcConfig)
 	//config = oauth2.Config{

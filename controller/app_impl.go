@@ -52,26 +52,26 @@ func parseNewNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 		log.Debug("empty payload")
 		return nil, errors.New("request payload is empty")
 	}
-	log.Trace("received request raw:", payload)
+	defer log.WithTrace().Info("received request raw:", payload)
 	pn := &hlcmsg.Pagenote{}
 	if err = proto.Unmarshal(payload, pn); err != nil {
 		log.Debug("Cannot parse Pagenote", err)
 		return nil, err
 	}
-	log.Trace("parsed request:", pn.Pageid, pn.Uid, pn.Url, len(pn.Highlights))
+	defer log.WithTrace().Info("parsed request:", pn.Pageid, pn.Uid, pn.Url, len(pn.Highlights))
 	patchPageID(pn)
 	return pn, nil
 }
 
 func patchPageID(pn *hlcmsg.Pagenote) error {
 	if pn.Pageid < 1 {
-		log.Trace("Cleaing url:", pn.Url)
+		defer log.WithTrace().Info("Cleaing url:", pn.Url)
 		var err error
 		pn.Url, err = cleanURL(pn.Url)
 		if err != nil {
 			return err
 		}
-		log.Trace("Cleaned url:", pn.Url)
+		defer log.WithTrace().Info("Cleaned url:", pn.Url)
 		pn.Pageid = storage.QueryPageID(pn.Url)
 	}
 	return nil
@@ -88,7 +88,7 @@ func cleanURL(urlstr string) (string, error) {
 		log.Warn("Error parsing url", urlstr, err)
 		return "", err
 	}
-	log.Trace("parsed url:", u.String())
+	defer log.WithTrace().Info("parsed url:", u.String())
 	if u.String() == "" {
 		return "", errors.New("url shouldn't be empty")
 	}

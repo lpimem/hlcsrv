@@ -63,16 +63,16 @@ func DeleteRangeMetas(idList []uint32) []uint32 {
 
 // QueryPageID returns the ID of page
 func QueryPageID(url string) uint32 {
-	log.Trace("Querying id for page ", url)
+	defer log.WithTrace().Info("Querying id for page ", url)
 	id := storage.QueryPageID(url)
 	if id < 1 {
 		id = storage.NewPage("", url)
-		log.Trace("new page id", id, url)
+		defer log.WithTrace().Info("new page id", id, url)
 	}
 	if id < 1 {
 		id = storage.QueryPageID(url)
 	}
-	log.Trace("page id for ", url, " is ", id)
+	defer log.WithTrace().Info("page id for ", url, " is ", id)
 	return id
 }
 

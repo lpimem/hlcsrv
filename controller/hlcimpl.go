@@ -46,7 +46,7 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	pn.Uid = uint32(uid)
 	if pid <= 0 {
 		pn.Url = params.Get("url")
-		defer log.Trace("creating new page profile for url: ", pn.Url)
+		defer log.WithTrace().Info("creating new page profile for url: ", pn.Url)
 		err = patchPageID(pn)
 	} else {
 		if err = verifyPid(uint32(pid)); err == nil {

@@ -31,7 +31,7 @@ func AddRequestInterceptor(handler RequestInterceptor) {
 func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) (*http.Request, bool) {
 	var err error
 	for _, handle := range interceptors {
-		log.Trace("applying preprocessor:", handle)
+		defer log.WithTrace().Info("applying preprocessor:", handle)
 		req, err = handle(req)
 		if err != nil {
 			log.Warn("error pre-processing", err)
@@ -39,6 +39,6 @@ func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) (*http
 			return req, false
 		}
 	}
-	log.Trace("all pre-processors done.")
+	defer log.WithTrace().Info("all pre-processors done.")
 	return req, true
 }
