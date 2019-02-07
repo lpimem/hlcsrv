@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/go-playground/log"
@@ -101,6 +102,15 @@ func requirePost(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
+func encodePath(u *url.URL) string {
+	path := u.Path
+	if u.RawQuery != "" {
+		path += "%3F"
+		path += u.RawQuery
+	}
+	return path
+}
+
 func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 	var authorized = true
 	if !auth.IsAuthenticated(r) {
@@ -111,7 +121,9 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 			errMsg = errMsg + ": " + reason.(string)
 		}
 		log.Warn(errMsg)
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		nextPage := encodePath(r.URL)
+		loginUrl := conf.LoginURL() + "?" + nextPage
+		http.Redirect(w, r, loginUrl, http.StatusSeeOther)
 		authorized = false
 	}
 	return authorized

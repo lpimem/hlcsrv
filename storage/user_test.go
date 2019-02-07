@@ -17,10 +17,10 @@ func TestUserAll(t *testing.T) {
 	}
 	for _, uInfo := range all {
 		if uInfo.ID < 1 {
-			t.Error("User's info shouldn't be < 1, %v", uInfo)
+			t.Errorf("User's info shouldn't be < 1, %v", uInfo)
 		}
 		if len(uInfo.Email) < 1 {
-			t.Error("Invalid email address, %v", uInfo)
+			t.Errorf("Invalid email address, %v", uInfo)
 		}
 	}
 }

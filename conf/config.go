@@ -64,3 +64,7 @@ func GoogleSignInAppID() string {
 func GoogleOAuthRedirectURL() string {
 	return "http://127.0.0.1:5556/auth/google/callback"
 }
+
+func LoginURL() string {
+	return "/static/login.html"
+}

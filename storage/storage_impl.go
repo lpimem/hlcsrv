@@ -279,6 +279,7 @@ func initDb(db *sql.DB) error {
 func prepareSQLDb(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
+		log.Warn("Cannot open db", path, err)
 		return nil, err
 	}
 	if err := initDb(db); err != nil {
