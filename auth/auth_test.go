@@ -56,6 +56,8 @@ func TestAuthenticate(t *testing.T) {
 		&authCase{"sid missing", "", uint32(10), false},
 	}
 
+	var w *httptest.ResponseRecorder
+
 	for _, byCookie := range []bool{true, false} {
 		for _, tc := range testCases {
 			var tcname string
@@ -80,7 +82,8 @@ func TestAuthenticate(t *testing.T) {
 				} else {
 					req, err = setByHeader(req, tc.UID, tc.Sid)
 				}
-				req, err = Authenticate(req)
+				w = httptest.NewRecorder() 
+				req, _, err = Authenticate(req, w)
 				if IsAuthenticated(req) != tc.Suc {
 					log.Debug(req.Context().Value(AUTHENTICATED))
 					log.Debug(req.Context().Value(USER_ID))
@@ -134,7 +137,9 @@ func TestAuthorizeAdmin(t *testing.T) {
 				t.Fail()
 				return
 			}
-			req, err = Authenticate(req)
+			
+			w := httptest.NewRecorder() 
+			req, _, err = Authenticate(req, w)
 			pass := IsAuthenticated(req) && err == nil
 			if pass != tc.Suc {
 				if err != nil {

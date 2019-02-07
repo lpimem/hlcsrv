@@ -1,8 +1,14 @@
 package conf
 
 import "os"
+import "net/http"
+import "net/url"
 
 var debugFlag = false
+
+const (
+	_HLC_NEXT = "_hlc_next"
+)
 
 // IsDebug returns true should the app run in debugging mode.
 func IsDebug() bool {
@@ -67,4 +73,22 @@ func GoogleOAuthRedirectURL() string {
 
 func LoginURL() string {
 	return "/static/login.html"
+}
+
+func RedirectToLogin(next string, w http.ResponseWriter, r *http.Request) {
+	RedirectTo(LoginURL(), next, w, r)
+}
+
+func RedirectTo(redirectUrl string, next_url string,  w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url })
+	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+}
+
+func EncodePath(u *url.URL) string {
+	path := u.Path
+	if u.RawQuery != "" {
+		path += "%3F"
+		path += u.RawQuery
+	}
+	return path
 }

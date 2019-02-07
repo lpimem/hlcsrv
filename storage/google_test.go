@@ -68,7 +68,7 @@ func TestSqliteStorage_NewUserByGoogleID(t *testing.T) {
 				"100003",
 				"http://example.com/a.png",
 				"EN"},
-			false,
+			true,
 		},
 		{
 			"new google user with duplicate email",

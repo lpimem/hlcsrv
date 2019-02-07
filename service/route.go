@@ -34,6 +34,8 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/q",
 		controller.HandleQuery)
 
+	mux.HandleFunc("/reader", controller.Reader.Index)
+
 	// admin
 	mux.HandleFunc("/admin/users",
 		controller.Admin.Users)
