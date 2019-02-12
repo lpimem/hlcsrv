@@ -11,19 +11,24 @@
 <body>
 
     <div class="g-signin2" data-onsuccess="onSignIn" data-theme="light"></div>
-    <div id='hlc-log' class="hlc-log">
 
+    <div>
+        <form action="/logout" method="POST" >
+            <input type="submit" value="Logout" >
+        </form>
     </div>
+
+    <div id='hlc-log' class="hlc-log"> </div>
+
     <script>
         +function (exports) {
-            if (!chrome && !chrome.runtime) {
-                document.body.innerHTML = "only chrome browser is supported.";
-                return;
-            }
-
             let extensionId = window.location.hash;
             if (extensionId) {
                 extensionId = extensionId.replace("#", "");
+                if (!chrome && !chrome.runtime) {
+                    document.body.innerHTML = "only chrome browser is supported.";
+                    return;
+                }
             } else {
                 log("Login from browser.");
             }
@@ -83,6 +88,7 @@
                 let next = nextPage();
 
                 if (!!next) {
+                    Cookies.remove(HLC_NEXT);
                     window.location = next;
                 }
 

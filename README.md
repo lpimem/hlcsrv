@@ -2,7 +2,6 @@
 
 HLC Server
 
-
 ## Benchmarks
 
 ### 04/20/2017
@@ -14,4 +13,19 @@ BenchmarkGetPagenote/10-8  	  100000	    198909 ns/op	   16058 B/op	     562 all
 BenchmarkGetPagenote/100-8 	   20000	    776848 ns/op	   72858 B/op	    3540 allocs/op
 BenchmarkGetPagenote/1000-8     2000	   6432966 ns/op	  690328 B/op	   33258 allocs/op
 BenchmarkGetPagenoteP-8        50000	    293017 ns/op	   73156 B/op	    3543 allocs/op
+```
+
+## Notes
+
+Set environmnet variables before deploying/testing. 
+
+- `HLC_SESSION_SECRET`
+- `HLC_SESSION_KEY_USER`
+- `HLC_SESSION_KEY_SID`
+- `GOOGLE_OAUTH2_CLIENT_ID`
+
+Generate a random string:
+
+```bash
+env LC_CTYPE=C tr -dc "a-zA-Z0-9-_\$\?" < /dev/urandom | fold -w 64 | head -n 1
 ```

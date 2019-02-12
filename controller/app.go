@@ -73,6 +73,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Error(err)
 	}
+	conf.RedirectTo("/", "", w, req)
 }
 
 // GetPagenote handles get request to fetch notes for a user and a url
