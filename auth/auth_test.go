@@ -75,6 +75,7 @@ func TestAuthenticate(t *testing.T) {
 				if byCookie {
 					req, err = setByCookie(req, tc.UID, tc.Sid)
 					if err != nil {
+						t.Error(conf.SessionKeySID())
 						t.Error(err)
 						t.Fail()
 						return

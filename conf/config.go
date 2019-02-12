@@ -28,7 +28,7 @@ func SetDebug(option bool) {
  *   ```
  */
 func SessionSecret() string {
-	return "8M3W5A0CGYFx_bzjMzAFqLZ8esI3F0_CveBbgDZLd0hc2ManB3il2Cw9IPcY7Fr1"
+	return os.Getenv("HLC_SESSION_SECRET")
 }
 
 // Page should be a request parameter, not a cookie
@@ -42,13 +42,13 @@ func SessionSecret() string {
 /*SessionKeyUser is the random seed for key name for User Id.
  */
 func SessionKeyUser() string {
-	return "FXtlPiHcOtUHJ5Z7u_sw5CvdO23LAbvHhNeUmzqC59N5gmffoHki4-mIdbUb89Qw"
+	return os.Getenv("HLC_SESSION_KEY_USER")
 }
 
 /*SessionKeySID is the key for session id
  */
 func SessionKeySID() string {
-	return "ogIbzGvEnFY2XfuQsLXv6a38dF49tvMuum4R27abuY5xAv0xF2Hc3SXkGoIcbWqd"
+	return os.Getenv("HLC_SESSION_KEY_SID");
 }
 
 /*SessionValidHours defines how long a session could be idle for.
@@ -65,7 +65,7 @@ func GoogleSignInAppID() string {
 }
 
 /*GoogleOAuthRedirectURL returns the OAuth2.0 redirect URL for 3-legged authentication.
-(Currently this is feature is not supported)
+(Currently this is feature is not implemented)
 */
 func GoogleOAuthRedirectURL() string {
 	return "http://127.0.0.1:5556/auth/google/callback"
