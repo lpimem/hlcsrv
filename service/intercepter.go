@@ -29,9 +29,11 @@ func AddRequestInterceptor(handler RequestInterceptor) {
  * When the return value is false, the respWriter will be modifed with the error status
  */
 func PreprocessRequest(w http.ResponseWriter, req *http.Request) (*http.Request, bool) {
+	var handled bool 
+	var err error 
 	for _, handle := range interceptors {
 		defer log.WithTrace().Info("applying preprocessor:", handle)
-		req, handled, err := handle(req, w)
+		req, handled, err = handle(req, w)
 		if err != nil {
 			log.Warn("error pre-processing", err)
 			if !handled {

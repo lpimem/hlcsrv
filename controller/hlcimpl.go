@@ -111,7 +111,6 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 			errMsg = errMsg + ": " + reason.(string)
 		}
 		log.Warn(errMsg)
-		conf.RedirectToLogin("", w, r);
 		authorized = false
 	}
 	return authorized

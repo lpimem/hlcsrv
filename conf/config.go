@@ -3,6 +3,7 @@ package conf
 import "os"
 import "net/http"
 import "net/url"
+import "github.com/go-playground/log"
 
 var debugFlag = false
 
@@ -12,6 +13,9 @@ const (
 
 // IsDebug returns true should the app run in debugging mode.
 func IsDebug() bool {
+	if os.Getenv("HLC_DEBUG") == "1"{
+		return true
+	}
 	return debugFlag
 }
 
@@ -80,11 +84,13 @@ func RedirectToLogin(next string, w http.ResponseWriter, r *http.Request) {
 }
 
 func RedirectTo(redirectUrl string, next_url string,  w http.ResponseWriter, r *http.Request) {
+	log.Debug("Redirecting to ", redirectUrl, " -> ", next_url)
 	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url })
 	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }
 
 func EncodePath(u *url.URL) string {
+	log.Debug("Encoding:", u)
 	path := u.Path
 	if u.RawQuery != "" {
 		path += "%3F"

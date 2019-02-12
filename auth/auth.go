@@ -41,6 +41,7 @@ func Authenticate(req *http.Request, respWriter http.ResponseWriter) (*http.Requ
 		log.Info("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 	} else {
+		log.Debug("User ", uid, " is authenticated")
 		ctx = context.WithValue(ctx, USER_ID, uid)
 		ctx = context.WithValue(ctx, SESSION_ID, sid)
 		ctx = context.WithValue(ctx, AUTHENTICATED, true)
@@ -48,6 +49,9 @@ func Authenticate(req *http.Request, respWriter http.ResponseWriter) (*http.Requ
 	req = req.WithContext(ctx)
 	err = authorize(ctx, req)
 	if err != nil {
+		log.Warn("User ", uid, " is not authorized to access ", req.URL.Path)
+		ctx = context.WithValue(ctx, REASON, err.Error())
+		req = req.WithContext(ctx)
 		conf.RedirectToLogin(conf.EncodePath(req.URL), respWriter, req)
 	}
 	handledIfError := true
@@ -108,7 +112,6 @@ func authorizeUser(ctx context.Context, r *http.Request) error {
 		return errors.New("bad gateway")
 	}
 	if restricted {
-
 		if uid == nil {
 			return unauthorized
 		}
