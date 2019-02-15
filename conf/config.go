@@ -8,7 +8,7 @@ import "github.com/go-playground/log"
 var debugFlag = false
 
 const (
-	_HLC_NEXT = "_hlc_next"
+	_HLC_NEXT = "hlc.next"
 )
 
 // IsDebug returns true should the app run in debugging mode.
@@ -85,13 +85,13 @@ func RedirectToLogin(next string, w http.ResponseWriter, r *http.Request) {
 
 func RedirectTo(redirectUrl string, next_url string,  w http.ResponseWriter, r *http.Request) {
 	log.Debug("Redirecting to ", redirectUrl, " -> ", next_url)
-	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url, HttpOnly: false})
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url, Path: "/" })
 	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }
 
 func SetNext(w http.ResponseWriter, u *url.URL) {
 	encodedPath := EncodePath(u)
-	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: encodedPath, HttpOnly: false})
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: encodedPath,  Path: "/" })
 }
 
 func GetNext(r *http.Request) (string, error) {
