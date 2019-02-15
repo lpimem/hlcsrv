@@ -85,8 +85,24 @@ func RedirectToLogin(next string, w http.ResponseWriter, r *http.Request) {
 
 func RedirectTo(redirectUrl string, next_url string,  w http.ResponseWriter, r *http.Request) {
 	log.Debug("Redirecting to ", redirectUrl, " -> ", next_url)
-	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url })
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url, HttpOnly: false})
 	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+}
+
+func SetNext(w http.ResponseWriter, u *url.URL) {
+	encodedPath := EncodePath(u)
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: encodedPath, HttpOnly: false})
+}
+
+func GetNext(r *http.Request) (string, error) {
+	var (
+		err error
+		c *http.Cookie
+	)
+	if c, err = r.Cookie(_HLC_NEXT) ; err == nil {
+		return c.Value, err
+	}
+	return "", err
 }
 
 func EncodePath(u *url.URL) string {
