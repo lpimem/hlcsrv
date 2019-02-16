@@ -119,7 +119,7 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 
 func loadQTemplate() (err error) {
 	if conf.IsDebug() || qTemplate == nil {
-		qTemplatePath := util.GetAbsRunDirPath() + "/view/q.html.template"
+		qTemplatePath := util.GetHLCRoot() + "/view/q.html.template"
 		qTemplate, err = loadTemplate("q", qTemplatePath, errorPolicyReturn)
 	}
 	return err

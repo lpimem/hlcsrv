@@ -67,7 +67,7 @@ func (s *SqliteStorage) QueryPagenoteFuzzy(
 
 func buildPagenoteQuery(conds, fields, joins string) string {
 	var queryBuilder bytes.Buffer
-	queryBuilder.WriteString(`select 
+	queryBuilder.WriteString(`select
 a.id, a.anchor, a.start, a.startOffset, a.end, a.endOffset, a.page, a.author, a.option, a.text `)
 	queryBuilder.WriteString(fields)
 	queryBuilder.WriteString(` from hlc_range a `)
@@ -160,7 +160,7 @@ func (s *SqliteStorage) NewRangeMeta(
 	uid uint32, pid uint32, m *hlcmsg.RangeMeta) (uint32, error,
 ) {
 	r, err := s.DB.Exec(
-		`insert into hlc_range(anchor, start, startOffset, end, 
+		`insert into hlc_range(anchor, start, startOffset, end,
 endOffset, text, page, author, option)
 values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		m.Anchor, m.Start, m.StartOffset, m.End, m.EndOffset,
@@ -264,11 +264,11 @@ func (s *SqliteStorage) QueryUser(handle, password string) (id uint32) {
 }
 
 func initDb(db *sql.DB) error {
-	fpath := util.GetAbsRunDirPath() + "/db/tables.sql"
+	fpath := util.GetHLCRoot() + "/db/tables.sql"
 	createTables, err := ioutil.ReadFile(fpath)
 	if err != nil {
 		log.Error("Cannot init db: ", err)
-		log.Error("    Current dir: ", util.GetAbsRunDirPath())
+		log.Error("    Current dir: ", util.GetHLCRoot())
 		log.Error("    file path:", fpath)
 		return err
 	}

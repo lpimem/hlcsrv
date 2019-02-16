@@ -109,7 +109,7 @@ func count(db *sql.DB, tb string) (uint64, error) {
 
 func init() {
 	var err error
-	dbpath := GetAbsRunDirPath() + "/db/unittest.db"
+	dbpath := GetHLCRoot() + "/db/unittest.db"
 	log.Info(dbpath)
 	if _, err = os.Stat(dbpath); os.IsExist(err) {
 		os.Remove(dbpath)
@@ -120,11 +120,11 @@ func init() {
 		return
 	}
 
-	fpath := GetAbsRunDirPath() + "/db/tables.sql"
+	fpath := GetHLCRoot() + "/db/tables.sql"
 	createTables, err := ioutil.ReadFile(fpath)
 	if err != nil {
 		log.Error("Cannot init db: ", err)
-		log.Error("    Current dir: ", GetAbsRunDirPath())
+		log.Error("    Current dir: ", GetHLCRoot())
 		log.Error("    file path:", fpath)
 		return
 	}
