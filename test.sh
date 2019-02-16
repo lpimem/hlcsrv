@@ -1,11 +1,19 @@
 #! /bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [[ ! -f $DIR/test.env ]] ; then
+  echo "Please create $DIR/test.env and add required ENV variables"
+  echo "HLC_SESSION_SECRET"
+  echo "HLC_SESSION_KEY_USER"
+  echo "HLC_SESSION_KEY_SID"
+  exit 1
+fi
+
+source $DIR/test.env
+
 TESTDIR=$DIR/build/test
-
 export HLC_ROOT=$TESTDIR
-
 OPTION=$1
-
 echo "TEST DIR: $TESTDIR"
 
 mkdir -p $TESTDIR
