@@ -275,8 +275,9 @@ func TestLogout(t *testing.T) {
 	}
 	resp := httptest.NewRecorder()
 	Logout(resp, r)
-	if resp.Code != http.StatusOK {
-		t.Errorf("response code is not OK: %d", resp.Code)
+	expected := http.StatusSeeOther
+	if resp.Code != expected {
+		t.Errorf("response code is not %d: %d", expected, resp.Code)
 		t.Fail()
 	}
 
@@ -289,7 +290,8 @@ func TestLogout(t *testing.T) {
 		t.Error("session still exists after logout: ", lastAccess)
 		t.Fail()
 	}
-	if r, err = auth.Authenticate(r); err != nil {
+	w := httptest.NewRecorder()
+	if r, _, err = auth.Authenticate(r, w); err != nil {
 		t.Error("Authenticate error", err)
 		t.Fail()
 	}

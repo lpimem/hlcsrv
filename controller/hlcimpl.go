@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	"github.com/go-playground/log"
@@ -33,9 +32,8 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 		err      error
 	)
 	params := r.URL.Query()
-	if uid, err = strconv.ParseUint(
-		params.Get("uid"), 10, 32); err != nil {
-		log.Error("cannot extract uid from request ", err)
+	if uid, err = strconv.ParseUint(params.Get("uid"), 10, 32); err != nil {
+		defer  log.WithTrace().Error("cannot extract uid from request ", err)
 		return nil, err
 	}
 	if pid, err = strconv.ParseUint(
@@ -102,13 +100,8 @@ func requirePost(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
-func encodePath(u *url.URL) string {
-	path := u.Path
-	if u.RawQuery != "" {
-		path += "%3F"
-		path += u.RawQuery
-	}
-	return path
+func isHTTPOption(r *http.Request) bool {
+	return r.Method == http.MethodOptions
 }
 
 func requireAuth(w http.ResponseWriter, r *http.Request) bool {
@@ -121,9 +114,6 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 			errMsg = errMsg + ": " + reason.(string)
 		}
 		log.Warn(errMsg)
-		nextPage := encodePath(r.URL)
-		loginUrl := conf.LoginURL() + "?" + nextPage
-		http.Redirect(w, r, loginUrl, http.StatusSeeOther)
 		authorized = false
 	}
 	return authorized

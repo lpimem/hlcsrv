@@ -1,9 +1,19 @@
 #! /bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-TESTDIR=$DIR/build
 
+if [[ ! -f $DIR/test.env ]] ; then
+  echo "Please create $DIR/test.env and add required ENV variables"
+  echo "HLC_SESSION_SECRET"
+  echo "HLC_SESSION_KEY_USER"
+  echo "HLC_SESSION_KEY_SID"
+  exit 1
+fi
+
+source $DIR/test.env
+
+TESTDIR=$DIR/build/test
+export HLC_ROOT=$TESTDIR
 OPTION=$1
-
 echo "TEST DIR: $TESTDIR"
 
 mkdir -p $TESTDIR
@@ -28,9 +38,6 @@ for d in */ ; do
   pushd $tc > /dev/null
   go test $OPTION --ldflags -s -o $TESTDIR/$tc.test ../$tc > $TEST_RESULT 2>&1
   ret=$?
-  # if [ $ret != 0 ] ; then
-  #     suc=$ret
-  # fi 
   popd > /dev/null
 
   input="$TEST_RESULT"
@@ -42,7 +49,7 @@ for d in */ ; do
           if [[ $msg != *"--- PASS"* ]]; then
             color=$RED
             suc=1
-          else 
+          else
             color="${RESET}$GREY$GREEN"
           fi
         fi
@@ -59,7 +66,7 @@ for d in */ ; do
       break
     fi
   done < "$input"
-done 
+done
 
 ./test_setup.sh 2
 

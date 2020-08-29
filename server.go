@@ -20,7 +20,7 @@ func startServ() {
 }
 
 func _init() {
-	storage.InitStorage(util.GetAbsRunDirPath() + "/db/dev.db")
+	storage.InitStorage(util.GetHLCRoot() + "/db/dev.db")
 }
 
 func serve(ip string, port int64) {

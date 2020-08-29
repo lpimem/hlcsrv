@@ -16,12 +16,14 @@ import (
 const admin string = "admin"
 const adminUserID storage.UserID = 1
 
+
+
 // Authenticate implements the interceptor interface.
 // It adds a flag to the request context to indicate if the
 // request is authenticated. If authenticated, it also checks
 // if the request is trying to access an admin URI and returns
 // error if the request is not from the admin user.
-func Authenticate(req *http.Request) (*http.Request, error) {
+func Authenticate(req *http.Request, respWriter http.ResponseWriter) (*http.Request, bool, error) {
 	var (
 		uid storage.UserID
 		sid string
@@ -35,21 +37,25 @@ func Authenticate(req *http.Request) (*http.Request, error) {
 	if err != nil {
 		log.Info("cannot extract uid/sid:", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
-		req = req.WithContext(ctx)
-		return req, authorize(ctx, req)
-	}
-	if err = VerifySession(sid, uid, nil); err != nil {
+	} else if err = VerifySession(sid, uid, nil); err != nil {
 		log.Info("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
-		req = req.WithContext(ctx)
-		return req, authorize(ctx, req)
+	} else {
+		log.Debug("User ", uid, " is authenticated")
+		ctx = context.WithValue(ctx, USER_ID, uid)
+		ctx = context.WithValue(ctx, SESSION_ID, sid)
+		ctx = context.WithValue(ctx, AUTHENTICATED, true)
 	}
-	ctx = context.WithValue(ctx, USER_ID, uid)
-	ctx = context.WithValue(ctx, SESSION_ID, sid)
-	ctx = context.WithValue(ctx, AUTHENTICATED, true)
 	req = req.WithContext(ctx)
-	log.Info("request from", uid, "is authorized.")
-	return req, authorize(ctx, req)
+	err = authorize(ctx, req)
+	if err != nil {
+		log.Warn("User ", uid, " is not authorized to access ", req.URL.Path)
+		ctx = context.WithValue(ctx, REASON, err.Error())
+		req = req.WithContext(ctx)
+		conf.RedirectToLogin(conf.EncodePath(req.URL), respWriter, req)
+	}
+	handledIfError := true
+	return req, handledIfError, err
 }
 
 // IsSessionTimeout returns if duration since lastAccess exceeds the max session lifetime

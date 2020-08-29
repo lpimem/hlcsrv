@@ -1,11 +1,21 @@
 package conf
 
 import "os"
+import "net/http"
+import "net/url"
+import "github.com/go-playground/log"
 
 var debugFlag = false
 
+const (
+	_HLC_NEXT = "hlc.next"
+)
+
 // IsDebug returns true should the app run in debugging mode.
 func IsDebug() bool {
+	if os.Getenv("HLC_DEBUG") == "1"{
+		return true
+	}
 	return debugFlag
 }
 
@@ -22,7 +32,7 @@ func SetDebug(option bool) {
  *   ```
  */
 func SessionSecret() string {
-	return "8M3W5A0CGYFx_bzjMzAFqLZ8esI3F0_CveBbgDZLd0hc2ManB3il2Cw9IPcY7Fr1"
+	return os.Getenv("HLC_SESSION_SECRET")
 }
 
 // Page should be a request parameter, not a cookie
@@ -36,13 +46,13 @@ func SessionSecret() string {
 /*SessionKeyUser is the random seed for key name for User Id.
  */
 func SessionKeyUser() string {
-	return "FXtlPiHcOtUHJ5Z7u_sw5CvdO23LAbvHhNeUmzqC59N5gmffoHki4-mIdbUb89Qw"
+	return os.Getenv("HLC_SESSION_KEY_USER")
 }
 
 /*SessionKeySID is the key for session id
  */
 func SessionKeySID() string {
-	return "ogIbzGvEnFY2XfuQsLXv6a38dF49tvMuum4R27abuY5xAv0xF2Hc3SXkGoIcbWqd"
+	return os.Getenv("HLC_SESSION_KEY_SID");
 }
 
 /*SessionValidHours defines how long a session could be idle for.
@@ -59,7 +69,7 @@ func GoogleSignInAppID() string {
 }
 
 /*GoogleOAuthRedirectURL returns the OAuth2.0 redirect URL for 3-legged authentication.
-(Currently this is feature is not supported)
+(Currently this is feature is not implemented)
 */
 func GoogleOAuthRedirectURL() string {
 	return "http://127.0.0.1:5556/auth/google/callback"
@@ -67,4 +77,40 @@ func GoogleOAuthRedirectURL() string {
 
 func LoginURL() string {
 	return "/static/login.html"
+}
+
+func RedirectToLogin(next string, w http.ResponseWriter, r *http.Request) {
+	RedirectTo(LoginURL(), next, w, r)
+}
+
+func RedirectTo(redirectUrl string, next_url string,  w http.ResponseWriter, r *http.Request) {
+	log.Debug("Redirecting to ", redirectUrl, " -> ", next_url)
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url, Path: "/" })
+	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+}
+
+func SetNext(w http.ResponseWriter, u *url.URL) {
+	encodedPath := EncodePath(u)
+	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: encodedPath,  Path: "/" })
+}
+
+func GetNext(r *http.Request) (string, error) {
+	var (
+		err error
+		c *http.Cookie
+	)
+	if c, err = r.Cookie(_HLC_NEXT) ; err == nil {
+		return c.Value, err
+	}
+	return "", err
+}
+
+func EncodePath(u *url.URL) string {
+	log.Debug("Encoding:", u)
+	path := u.Path
+	if u.RawQuery != "" {
+		path += "%3F"
+		path += u.RawQuery
+	}
+	return path
 }

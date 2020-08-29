@@ -6,7 +6,7 @@ import (
 )
 
 func InitTestDb() {
-	InitStorage(util.GetAbsRunDirPath() + "/db/test.db")
+	InitStorage(util.GetHLCRoot() + "/db/test.db")
 	err := cleanDb()
 	if err != nil {
 		panic(err)
@@ -33,11 +33,11 @@ func cleanDb() error {
 
 func seedTestDb() error {
 	_, err := storage.DB.Exec(`
-	insert into hlc_user(id, name, email, password, _slt) 
+	insert into hlc_user(id, name, email, password, _slt)
 		values (1, "Bob", "bob@example.com", "unsafe", "unsafe");
-	insert into hlc_user(id, name, email, password, _slt) 
+	insert into hlc_user(id, name, email, password, _slt)
 		values (10, "ExAm", "example@gmail.com", "unsafe", "unsafe");
-	insert into hlc_user(id, name, email, password, _slt) 
+	insert into hlc_user(id, name, email, password, _slt)
 		values (2, "alice", "alice@example.com", "unsafeA", "unsafe1ce");
 
 	insert into hlc_page(id, title, url)

@@ -2,10 +2,10 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
+	"fmt"
 
 	"strings"
 
@@ -20,11 +20,18 @@ var (
 	qTemplate *template.Template
 )
 
+type QueryRecord struct {
+	Count int; 
+	Text string;
+	UrlLabel string;
+	Url template.URL;
+}
+
 type queryStatus struct {
 	Error  error
 	Query  string
 	Count  int
-	Result [][]interface{}
+	Result []QueryRecord
 }
 
 // HandleQuery process query requrests
@@ -84,42 +91,51 @@ func extractURLDomain(uri string) string {
 func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.PagenoteAddon) *queryStatus {
 	var s = &queryStatus{}
 	s.Query = q
-	s.Result = make([][]interface{}, 0, len(pages))
+	s.Result = []QueryRecord{}
 	var count = 0
 	for _, pnotes := range pagenotes {
 		for _, pnote := range pnotes {
 			for _, hlt := range pnote.Highlights {
 				count++
-				record := make([]interface{}, 0, 4)
 				pageTitle := pages[hlt.Id][0]
 				pageURI := pages[hlt.Id][1]
 				var urlLabel string
+				var urlStr string
 				if bytes, ok := pageTitle.([]byte); ok {
 					urlLabel = strings.TrimSpace(string(bytes))
+				} else if astring, ok := pageTitle.(string); ok {
+					urlLabel = astring
 				}
 				if bytes, ok := pageURI.([]byte); ok {
-					urlStr := string(bytes)
-					if urlLabel == "" {
-						urlLabel = extractURLDomain(urlStr)
+					urlStr = string(bytes)
+				} else {
+					if astring, ok := pageURI.(string); !ok{
+						defer log.Error(fmt.Sprintf("Cannot parse URL: %s", pageURI))
+						continue
+				} else {
+						urlStr = astring
 					}
-					if len(urlLabel) > 30 {
-						urlLabel = urlLabel[:30]
-					}
-					pageURI = template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", urlStr, urlLabel))
 				}
-				record = append(record, count, hlt.Text, pageURI)
-				s.Result = append(s.Result, record)
+				if urlLabel == "" {
+					urlLabel = extractURLDomain(urlStr)
+				}
+				if len(urlLabel) > 30 {
+					urlLabel = urlLabel[:30]
+				}
+				url := template.URL(urlStr)
+				s.Result = append(s.Result, 
+					QueryRecord{count, hlt.Text, urlLabel, url})
 			}
 		}
 	}
 	s.Count = count
-	log.Debug(count, " records found for ", q)
+	log.Debug(count, " records found for '", q, "'")
 	return s
 }
 
 func loadQTemplate() (err error) {
 	if conf.IsDebug() || qTemplate == nil {
-		qTemplatePath := util.GetAbsRunDirPath() + "/view/q.html.template"
+		qTemplatePath := util.GetHLCRoot() + "/view/q.html.template"
 		qTemplate, err = loadTemplate("q", qTemplatePath, errorPolicyReturn)
 	}
 	return err

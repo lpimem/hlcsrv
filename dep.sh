@@ -1,3 +1,4 @@
+go mod init
 go get github.com/coreos/go-oidc
 go get github.com/go-playground/log
 go get github.com/mattn/go-sqlite3

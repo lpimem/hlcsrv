@@ -11,7 +11,7 @@ import (
  * It can prevent the request from being further processed by returning
  * an error
  */
-type RequestInterceptor func(req *http.Request) (*http.Request, error)
+type RequestInterceptor func(req *http.Request, respWriter http.ResponseWriter) (*http.Request, bool, error)
 
 var interceptors = []RequestInterceptor{}
 
@@ -28,14 +28,17 @@ func AddRequestInterceptor(handler RequestInterceptor) {
  * It returns true if no interceptor is complaining error.
  * When the return value is false, the respWriter will be modifed with the error status
  */
-func PreprocessRequest(respWriter http.ResponseWriter, req *http.Request) (*http.Request, bool) {
-	var err error
+func PreprocessRequest(w http.ResponseWriter, req *http.Request) (*http.Request, bool) {
+	var handled bool 
+	var err error 
 	for _, handle := range interceptors {
 		defer log.WithTrace().Info("applying preprocessor:", handle)
-		req, err = handle(req)
+		req, handled, err = handle(req, w)
 		if err != nil {
 			log.Warn("error pre-processing", err)
-			http.Error(respWriter, err.Error(), http.StatusBadRequest)
+			if !handled {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
 			return req, false
 		}
 	}

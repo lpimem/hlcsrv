@@ -15,12 +15,12 @@ func (builder *ReqCookieCheckerBuilder) Require(key string) {
 
 // Returns a interceptor function to check required cookies
 func (builder ReqCookieCheckerBuilder) Build() RequestInterceptor {
-	return func(req *http.Request) (*http.Request, error) {
+	return func(req *http.Request, w http.ResponseWriter) (*http.Request, bool, error) {
 		for _, expect := range builder.headers {
 			if _, err := req.Cookie(expect); err != nil {
-				return req, err
+				return req, false, err
 			}
 		}
-		return req, nil
+		return req, false, nil
 	}
 }

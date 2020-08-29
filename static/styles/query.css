@@ -1,0 +1,74 @@
+body {
+    font-family: Helvetica, arial, sans-serif;
+    font-weight: lighter;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    padding: 50px;
+  }
+
+  #layout{
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    margin: 5px;
+    width: 720px;
+  }
+
+  .border-bottom {
+    border-bottom: #E0E0E0 1px solid;
+  }
+
+  td {
+    padding: 5px;
+  }
+
+  td:first-child {
+    font-style: italic;
+    color: #909090;
+  }
+
+  td:last-child {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  tr:hover td {
+    background-color: #E0E0E0;
+  }
+
+  form {
+    line-height: 1em;
+    font-size: 1.5em;
+    font-weight: lighter;
+  }
+
+  #ipt_query {
+    min-width: 300px;
+    padding: 0 5px;
+    font-size: 1.2em;
+    font-weight: lighter;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .pale {
+    color: #909090;
+    margin: 20px 0 0 0;
+  }
+
+  input[type=submit] {
+    padding: 5px 15px;
+    background: #ccc;
+    border: 0 none;
+    cursor: pointer;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    font-weight: lighter;
+  }

@@ -5,3 +5,5 @@ db/*.db
 .idea
 static/*.js
 static/*.map
+*.env
+.DS_Store

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="encoding" value="utf-8" />
+  <title> Highlights Query </title>
+  <link type='text/stylesheet' href="/static/styles/query.css" />
+</head>
+
+<body>
+  <div id="layout">
+    <form method="POST" action="/q">
+      <input id="ipt_query" type="text" name='query' value="{{.Query}}"></input>
+      <input id="ipt_submit" type="submit" value="Query" />
+    </form>
+    {{if .}} 
+      {{if .Error}}
+      <div class="error">
+        Error: {{.Error}}
+      </div>
+      {{else}}
+        <div class='pale'> {{.Count}} results found. </div>
+        <table>
+          <tbody>
+            {{range .Result}}
+            <tr class="border-bottom">
+              {{range .}}
+              <td> {{.}} </td>
+              {{end}}
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      {{end}}
+    {{end}}
+  </div>
+</body>
+
+</html>

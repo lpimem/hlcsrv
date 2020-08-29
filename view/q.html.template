@@ -97,12 +97,12 @@
         <div class='pale'> {{.Count}} results found. </div>
         <table>
           <tbody>
-            {{range .Result}}
-            <tr class="border-bottom">
-              {{range .}}
-              <td> {{.}} </td>
-              {{end}}
-            </tr>
+            {{range $i, $r := .Result}}
+              <tr class="border-bottom">
+                <td> {{ $r.Count }} </td>
+                <td> {{ $r.Text }} </td>
+                <td> <a href="{{ $r.Url }}"> {{ $r.UrlLabel }} </a> </td>
+              </tr>
             {{end}}
           </tbody>
         </table>
