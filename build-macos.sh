@@ -1,6 +1,6 @@
 DIR=$(dirname `realpath -P $0`)
 cd $DIR
-CGO_ENABLED=1 go build --ldflags -s -v -o build/hlcsrv
+CGO_ENABLED=1 go build --ldflags -s "$@" -v -o build/hlcsrv
 ret=$!
 if [[ ${ret} -ne 0 ]]; then
     echo "If go-sqlite3 is complaining, try the following commands. 

@@ -5,7 +5,7 @@ import "net/http"
 import "net/url"
 import "github.com/go-playground/log"
 
-var debugFlag = true
+var debugFlag = false
 
 const (
 	_HLC_NEXT = "hlc.next"

@@ -6,3 +6,4 @@ db/*.db
 static/*.js
 static/*.map
 *.env
+.DS_Store
