@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-playground/log"
 	"github.com/lpimem/hlcsrv/auth"
+	"github.com/lpimem/hlcsrv/security"
 	"github.com/lpimem/hlcsrv/conf"
 	"github.com/lpimem/hlcsrv/hlccookie"
 	"github.com/lpimem/hlcsrv/storage"
@@ -95,8 +96,12 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 //   1. hlc_resp.proto https://github.com/lpimem/hlcproto/blob/e7787d65aea33d1eb97b3f1f208394ee6a59f187/hlc_resp.proto
 func GetPagenote(w http.ResponseWriter, req *http.Request) {
 	defer  log.WithTrace().Info("GetPagenote...")
+	security.EnableCORS(w)
+	if (isHTTPOption(req)) {
+		return
+	}
 	if !requireAuth(w, req) {
-		log.Warn("Not authorized...")
+		log.Warn("GetPagenote: not authorized...")
 		return
 	}
 	pn, err := parseGetNotesRequest(req)
@@ -121,10 +126,16 @@ func GetPagenote(w http.ResponseWriter, req *http.Request) {
 //   Serialized @hlcmsg.HlcResp message encoded in base64.
 func SavePagenote(w http.ResponseWriter, req *http.Request) {
 	defer  log.WithTrace().Info("SavePagenote...")
+	security.EnableCORS(w)
+	if (isHTTPOption(req)) {
+		return
+	}
 	if !requirePost(w, req) {
+		log.Warn("SavePagenote: invalid http method...")
 		return
 	}
 	if !requireAuth(w, req) {
+		log.Warn("SavePagenote: not authorized...")
 		return
 	}
 	pn, err := parseNewNotesRequest(req)
@@ -149,10 +160,16 @@ func SavePagenote(w http.ResponseWriter, req *http.Request) {
 // DeletePagenote handles the post request to delete an array of notes.
 func DeletePagenote(w http.ResponseWriter, req *http.Request) {
 	defer  log.WithTrace().Info("DeletePagenote...")
+	security.EnableCORS(w)
+	if (isHTTPOption(req)) {
+		return
+	}
 	if !requirePost(w, req) {
+		log.Warn("DeletePagenote: invalid http method...")
 		return
 	}
 	if !requireAuth(w, req) {
+		log.Warn("SavePagenote: not authorized...")
 		return
 	}
 	idList := parseRemoveNotesRequest(req)

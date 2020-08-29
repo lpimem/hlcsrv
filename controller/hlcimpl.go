@@ -32,9 +32,8 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 		err      error
 	)
 	params := r.URL.Query()
-	if uid, err = strconv.ParseUint(
-		params.Get("uid"), 10, 32); err != nil {
-		log.Error("cannot extract uid from request ", err)
+	if uid, err = strconv.ParseUint(params.Get("uid"), 10, 32); err != nil {
+		defer  log.WithTrace().Error("cannot extract uid from request ", err)
 		return nil, err
 	}
 	if pid, err = strconv.ParseUint(
@@ -99,6 +98,10 @@ func requirePost(w http.ResponseWriter, r *http.Request) bool {
 	}
 	http.Error(w, "bad request", http.StatusBadRequest)
 	return false
+}
+
+func isHTTPOption(r *http.Request) bool {
+	return r.Method == http.MethodOptions
 }
 
 func requireAuth(w http.ResponseWriter, r *http.Request) bool {
