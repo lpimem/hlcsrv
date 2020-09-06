@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -20,8 +21,13 @@ func parseRemoveNotesRequest(r *http.Request) *hlcmsg.IdList {
 		return nil
 	}
 	if err = proto.Unmarshal(payload, ids); err != nil {
-		log.Debug("Cannot parse IdList", err)
-		return nil
+		log.Debug("Cannot parse IdList as Protobuf", err)
+		arr := make([]uint32, 1)
+		if err = json.Unmarshal(payload, &arr); err != nil {
+			log.Debug("Cannot parse IdList as JOSN", err)
+			return nil
+		}
+		ids.Arr = arr
 	}
 	return ids
 }
@@ -33,7 +39,7 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	)
 	params := r.URL.Query()
 	if uid, err = strconv.ParseUint(params.Get("uid"), 10, 32); err != nil {
-		defer  log.WithTrace().Error("cannot extract uid from request ", err)
+		defer log.WithTrace().Error("cannot extract uid from request ", err)
 		return nil, err
 	}
 	if pid, err = strconv.ParseUint(
@@ -42,6 +48,11 @@ func parseGetNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	}
 	pn := &hlcmsg.Pagenote{}
 	pn.Uid = uint32(uid)
+	currentUID := uint32(auth.RequestUID(r))
+	if pn.Uid != currentUID {
+		log.Warnf("User %d is trying to request notes from User %d", currentUID, pn.Uid)
+		pn.Uid = currentUID
+	}
 	if pid <= 0 {
 		pn.Url = params.Get("url")
 		defer log.WithTrace().Info("creating new page profile for url: ", pn.Url)
@@ -112,8 +123,8 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 		var errMsg = "not authenticated"
 		if reason != nil && conf.IsDebug() {
 			errMsg = errMsg + ": " + reason.(string)
+			log.Warn(errMsg)
 		}
-		log.Warn(errMsg)
 		authorized = false
 	}
 	return authorized

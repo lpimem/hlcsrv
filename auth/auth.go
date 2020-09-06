@@ -16,8 +16,6 @@ import (
 const admin string = "admin"
 const adminUserID storage.UserID = 1
 
-
-
 // Authenticate implements the interceptor interface.
 // It adds a flag to the request context to indicate if the
 // request is authenticated. If authenticated, it also checks
@@ -35,13 +33,15 @@ func Authenticate(req *http.Request, respWriter http.ResponseWriter) (*http.Requ
 	req = req.WithContext(ctx)
 	uid, sid, err = extractUIDSid(req)
 	if err != nil {
-		log.Info("cannot extract uid/sid:", sid, uid, err)
+		if req.Method != http.MethodOptions {
+			log.Warn("cannot extract uid/sid:", sid, uid, err)
+		}
 		ctx = context.WithValue(ctx, REASON, err.Error())
 	} else if err = VerifySession(sid, uid, nil); err != nil {
-		log.Info("invalid session", sid, uid, err)
+		log.Warn("invalid session", sid, uid, err)
 		ctx = context.WithValue(ctx, REASON, err.Error())
 	} else {
-		log.Debug("User ", uid, " is authenticated")
+		log.Info("User ", uid, " is authenticated")
 		ctx = context.WithValue(ctx, USER_ID, uid)
 		ctx = context.WithValue(ctx, SESSION_ID, sid)
 		ctx = context.WithValue(ctx, AUTHENTICATED, true)
@@ -56,6 +56,16 @@ func Authenticate(req *http.Request, respWriter http.ResponseWriter) (*http.Requ
 	}
 	handledIfError := true
 	return req, handledIfError, err
+}
+
+// RequestUID returns authenticated user id
+func RequestUID(req *http.Request) storage.UserID {
+	return req.Context().Value(USER_ID).(storage.UserID)
+}
+
+// RequestSID returns authenticated session id
+func RequestSID(req *http.Request) string {
+	return req.Context().Value(SESSION_ID).(string)
 }
 
 // IsSessionTimeout returns if duration since lastAccess exceeds the max session lifetime

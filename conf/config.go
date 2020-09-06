@@ -1,9 +1,12 @@
 package conf
 
-import "os"
-import "net/http"
-import "net/url"
-import "github.com/go-playground/log"
+import (
+	"net/http"
+	"net/url"
+	"os"
+
+	"github.com/go-playground/log"
+)
 
 var debugFlag = false
 
@@ -13,7 +16,7 @@ const (
 
 // IsDebug returns true should the app run in debugging mode.
 func IsDebug() bool {
-	if os.Getenv("HLC_DEBUG") == "1"{
+	if os.Getenv("HLC_DEBUG") == "1" {
 		return true
 	}
 	return debugFlag
@@ -52,7 +55,7 @@ func SessionKeyUser() string {
 /*SessionKeySID is the key for session id
  */
 func SessionKeySID() string {
-	return os.Getenv("HLC_SESSION_KEY_SID");
+	return os.Getenv("HLC_SESSION_KEY_SID")
 }
 
 /*SessionValidHours defines how long a session could be idle for.
@@ -83,23 +86,23 @@ func RedirectToLogin(next string, w http.ResponseWriter, r *http.Request) {
 	RedirectTo(LoginURL(), next, w, r)
 }
 
-func RedirectTo(redirectUrl string, next_url string,  w http.ResponseWriter, r *http.Request) {
+func RedirectTo(redirectUrl string, next_url string, w http.ResponseWriter, r *http.Request) {
 	log.Debug("Redirecting to ", redirectUrl, " -> ", next_url)
-	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: next_url, Path: "/" })
+	http.SetCookie(w, &http.Cookie{Name: _HLC_NEXT, Value: next_url, Path: "/"})
 	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }
 
 func SetNext(w http.ResponseWriter, u *url.URL) {
 	encodedPath := EncodePath(u)
-	http.SetCookie(w, &http.Cookie{ Name: _HLC_NEXT, Value: encodedPath,  Path: "/" })
+	http.SetCookie(w, &http.Cookie{Name: _HLC_NEXT, Value: encodedPath, Path: "/"})
 }
 
 func GetNext(r *http.Request) (string, error) {
 	var (
 		err error
-		c *http.Cookie
+		c   *http.Cookie
 	)
-	if c, err = r.Cookie(_HLC_NEXT) ; err == nil {
+	if c, err = r.Cookie(_HLC_NEXT); err == nil {
 		return c.Value, err
 	}
 	return "", err

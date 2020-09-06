@@ -181,6 +181,35 @@ func (s *SqliteStorage) DeleteRangeMeta(id uint32) error {
 	return err
 }
 
+//FilterRangeMeta filter range ID list by user id
+func (s *SqliteStorage) FilterRangeMeta(idList []uint32, user UserID) (res []uint32) {
+	query := `select id from hlc_range where author = ? and id in (%s) `
+	placeholder := strings.Repeat("?,", len(idList)-1) + "?"
+	query = fmt.Sprintf(query, placeholder)
+	args := make([]interface{}, len(idList)+1)
+	args = append(args, uint32(user))
+	for _, oneID := range idList {
+		args = append(args, oneID)
+	}
+	rows, err := s.DB.Query(query, args...)
+	defer rows.Close()
+	res = make([]uint32, len(idList))
+	for rows.Next() {
+		var id uint32
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			res = append(res, id)
+		}
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Error(err)
+	}
+	return res
+}
+
 // QueryPageID returns page id for a given URI, 0 if not found.
 func (s *SqliteStorage) QueryPageID(url string) uint32 {
 	var id uint32

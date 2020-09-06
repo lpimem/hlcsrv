@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/lpimem/hlcsrv/auth"
+
 	"github.com/go-playground/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/lpimem/hlcsrv/hlcmsg"
@@ -33,9 +35,13 @@ func getNotes(pn *hlcmsg.Pagenote) *hlcmsg.Pagenote {
 	return nil
 }
 
-func rmNotes(toRemove *hlcmsg.IdList) *hlcmsg.IdList {
+func rmNotes(user storage.UserID, toRemove *hlcmsg.IdList) *hlcmsg.IdList {
 	if toRemove != nil && len(toRemove.Arr) > 0 {
-		deleted := storage.DeleteRangeMetas(toRemove.Arr)
+		idList := storage.FilterRangeByUID(toRemove.Arr, user)
+		deleted := make([]uint32, 0)
+		if len(idList) > 0 {
+			deleted = storage.DeleteRangeMetas(toRemove.Arr)
+		}
 		return &hlcmsg.IdList{
 			Arr: deleted,
 		}
@@ -57,6 +63,11 @@ func parseNewNotesRequest(r *http.Request) (*hlcmsg.Pagenote, error) {
 	if err = proto.Unmarshal(payload, pn); err != nil {
 		log.Debug("Cannot parse Pagenote", err)
 		return nil, err
+	}
+	currentUID := uint32(auth.RequestUID(r))
+	if currentUID != pn.Uid {
+		log.Warnf("User %d is trying to create notes as User %d", currentUID, pn.Uid)
+		pn.Uid = currentUID
 	}
 	defer log.WithTrace().Info("parsed request:", pn.Pageid, pn.Uid, pn.Url, len(pn.Highlights))
 	patchPageID(pn)

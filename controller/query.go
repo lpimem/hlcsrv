@@ -2,10 +2,10 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
-	"fmt"
 
 	"strings"
 
@@ -21,10 +21,11 @@ var (
 )
 
 type QueryRecord struct {
-	Count int; 
-	Text string;
-	UrlLabel string;
-	Url template.URL;
+	Count    int
+	Id       uint32
+	Text     string
+	UrlLabel string
+	Url      template.URL
 }
 
 type queryStatus struct {
@@ -37,7 +38,7 @@ type queryStatus struct {
 // HandleQuery process query requrests
 func HandleQuery(w http.ResponseWriter, req *http.Request) {
 	if !requireAuth(w, req) {
-		log.Warn("Not authorized...")
+		conf.RedirectToLogin(conf.EncodePath(req.URL), w, req)
 		return
 	}
 	if req.Method == "GET" {
@@ -109,10 +110,10 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 				if bytes, ok := pageURI.([]byte); ok {
 					urlStr = string(bytes)
 				} else {
-					if astring, ok := pageURI.(string); !ok{
+					if astring, ok := pageURI.(string); !ok {
 						defer log.Error(fmt.Sprintf("Cannot parse URL: %s", pageURI))
 						continue
-				} else {
+					} else {
 						urlStr = astring
 					}
 				}
@@ -123,8 +124,8 @@ func buildQueryStatus(q string, pagenotes storage.PagenoteDict, pages storage.Pa
 					urlLabel = urlLabel[:30]
 				}
 				url := template.URL(urlStr)
-				s.Result = append(s.Result, 
-					QueryRecord{count, hlt.Text, urlLabel, url})
+				s.Result = append(s.Result,
+					QueryRecord{count, hlt.Id, hlt.Text, urlLabel, url})
 			}
 		}
 	}

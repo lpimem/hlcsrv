@@ -47,6 +47,11 @@ func QueryPagenote(uid uint32, pid uint32) *hlcmsg.Pagenote {
 	return notes.GetPagenote(uid, pid)
 }
 
+// FilterRangeByUID returns a sublist of idList created by user.
+func FilterRangeByUID(idList []uint32, user UserID) []uint32 {
+	return storage.FilterRangeMeta(idList, user)
+}
+
 // DeleteRangeMetas delete list of meta from db
 func DeleteRangeMetas(idList []uint32) []uint32 {
 	deleted := []uint32{}

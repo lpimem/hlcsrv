@@ -79,6 +79,13 @@
       font-size: 1.2em;
       font-weight: lighter;
     }
+
+    td:first-child a {
+      text-decoration: none;
+      color: gray;
+      font-style: normal;
+      font-size: small;
+    }
   </style>
 </head>
 
@@ -98,7 +105,8 @@
         <table>
           <tbody>
             {{range $i, $r := .Result}}
-              <tr class="border-bottom">
+              <tr id="{{ $r.Id }}" class="border-bottom">
+                <td> <a href="javascript:void(0)" onclick="hlcDelete({{ $r.Id }})"> X </a> </td>
                 <td> {{ $r.Count }} </td>
                 <td> {{ $r.Text }} </td>
                 <td> <a href="{{ $r.Url }}"> {{ $r.UrlLabel }} </a> </td>
@@ -109,6 +117,19 @@
       {{end}}
     {{end}}
   </div>
+
+  <script>
+    function hlcDelete (id){
+      fetch("pagenote/delete", {
+        method: "POST", 
+        body: JSON.stringify([id,])
+      }).then(()=>{
+        let row = document.getElementById(id);
+        row.style="text-decoration: line-through;";
+        row.getElementsByTagName("a")[0].onclick = null;
+      });
+    }
+  </script>
 </body>
 
 </html>

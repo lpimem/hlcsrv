@@ -304,7 +304,7 @@ func TestLogout(t *testing.T) {
 func fakeAuthenticateion(r *http.Request) (*http.Request, error) {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, auth.AUTHENTICATED, true)
-	ctx = context.WithValue(ctx, auth.USER_ID, fakeUID)
+	ctx = context.WithValue(ctx, auth.USER_ID, storage.UserID(fakeUID))
 	ctx = context.WithValue(ctx, auth.SESSION_ID, fakeSID)
 	err := storage.UpdateSession(fakeSID, fakeUID)
 	return r.WithContext(ctx), err
